@@ -72,15 +72,13 @@ st.markdown("""
     .stApp > header {display: none !important;}
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    
+
     /* Hide any navigation tabs that might be auto-generated */
     [data-testid="stSidebarNav"], 
-    [data-testid="collapsedControl"],
-    [data-baseweb="tab-list"],
-    [data-baseweb="tab"] {
+    [data-testid="collapsedControl"] {
         display: none !important;
     }
-    
+
     /* Ensure the sidebar is the only navigation */
     section[data-testid="stSidebar"] {
         display: block !important;
@@ -91,8 +89,12 @@ st.markdown("""
 
 
 # Main App
+# Main App
 def main():
-    # Sidebar navigation
+    # Clear sidebar of any auto-generated navigation
+    st.sidebar.empty()
+
+    # Add our custom navigation
     st.sidebar.title("Navigation")
 
     # Store the current page in session state
@@ -103,7 +105,6 @@ def main():
     for page_name in ["Dashboard", "Job Applications", "Study Tracker", "Settings"]:
         # Determine if this button is active
         is_active = st.session_state.current_page == page_name
-        active_class = "sidebar-nav-button-active" if is_active else ""
 
         # Create the button with the appropriate styling
         if st.sidebar.button(
@@ -113,7 +114,7 @@ def main():
                 type="primary" if is_active else "secondary"
         ):
             st.session_state.current_page = page_name
-            # No need for st.experimental_rerun() in newer Streamlit versions
+            st.experimental_rerun()
 
     # Display page based on selection
     if st.session_state.current_page == "Dashboard":
@@ -127,7 +128,7 @@ def main():
 
     # Footer
     st.sidebar.markdown("---")
-    st.sidebar.info("Job Hunt & Study Tracker v1.0.0")
+    st.sidebar.info("Job Hunt & Study Tracker v1.0.1")
 
 
 if __name__ == "__main__":
