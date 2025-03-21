@@ -1,0 +1,38 @@
+{
+    "app": {
+        "name": "Job Hunt & Study Tracker",
+        "version": "1.0.0"
+    },
+    "database": {
+        "path": "data/database/job_hunt_tracker.db"
+    },
+    "uploads": {
+        "path": "data/uploads",
+        "allowed_extensions": ["pdf", "docx", "doc", "txt"]
+    },
+    "job_tracking": {
+        "weekly_goal": 5,
+        "statuses": [
+            "Applied",
+            "No Response",
+            "Rejected",
+            "Screening Call",
+            "Interview",
+            "Second Interview",
+            "Final Interview",
+            "Offer",
+            "Accepted",
+            "Declined"
+        ]
+    },
+    "study_tracking": {
+        "daily_target_minutes": 70,
+        "weekly_target_days": 5
+    },
+    "ui": {
+        "theme_color": "#4C78A8",
+        "secondary_color": "#59A14F",
+        "warning_color": "#E15759",
+        "affirmations_enabled": true
+    }
+}
