@@ -10,6 +10,7 @@ COLOR_SECONDARY = "#757761"   # Olive gray
 COLOR_ACCENT = "#E9724C"      # Coral orange
 COLOR_SUCCESS = "#E5F77D"     # Bright lime
 COLOR_BACKGROUND = "#F4F7BE"  # Light cream
+COLOR_TEXT = "#E5F77D"        # Lime for text
 
 
 def plot_applications_over_time(jobs_df):
@@ -64,14 +65,23 @@ def plot_applications_over_time(jobs_df):
             yanchor="bottom",
             y=1.02,
             xanchor="right",
-            x=1
+            x=1,
+            font=dict(color=COLOR_TEXT)
         ),
-        template='plotly_white',
-        plot_bgcolor=COLOR_BACKGROUND,
-        paper_bgcolor='white',
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0.05)',
         font=dict(
             family="Courier New, monospace",
-            color=COLOR_SECONDARY
+            color=COLOR_TEXT
+        ),
+        xaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
+        ),
+        yaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
         )
     )
 
@@ -119,7 +129,7 @@ def plot_status_distribution(jobs_df):
     fig.update_traces(
         textposition='inside',
         textinfo='percent+label',
-        marker=dict(line=dict(color='#FFFFFF', width=2))
+        marker=dict(line=dict(color='rgba(0,0,0,0.2)', width=2))
     )
 
     fig.update_layout(
@@ -128,13 +138,15 @@ def plot_status_distribution(jobs_df):
             yanchor="bottom",
             y=-0.1,
             xanchor="center",
-            x=0.5
+            x=0.5,
+            font=dict(color=COLOR_TEXT)
         ),
         margin=dict(t=60, b=60, l=20, r=20),
-        paper_bgcolor='white',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0.05)',
         font=dict(
             family="Courier New, monospace",
-            color=COLOR_SECONDARY
+            color=COLOR_TEXT
         )
     )
 
@@ -212,14 +224,23 @@ def plot_study_progress(study_df, daily_target=70):
             yanchor="bottom",
             y=1.02,
             xanchor="right",
-            x=1
+            x=1,
+            font=dict(color=COLOR_TEXT)
         ),
-        template='plotly_white',
-        plot_bgcolor=COLOR_BACKGROUND,
-        paper_bgcolor='white',
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0.05)',
         font=dict(
             family="Courier New, monospace",
-            color=COLOR_SECONDARY
+            color=COLOR_TEXT
+        ),
+        xaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
+        ),
+        yaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
         ),
         hovermode='x unified'
     )
@@ -245,11 +266,11 @@ def plot_weekly_study_progress(study_df, daily_target=70):
             title='Weekly Study Progress',
             xaxis_title='Week',
             yaxis_title='Minutes',
-            plot_bgcolor=COLOR_BACKGROUND,
-            paper_bgcolor='white',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
             font=dict(
                 family="Courier New, monospace",
-                color=COLOR_SECONDARY
+                color=COLOR_TEXT
             )
         )
         return fig
@@ -303,14 +324,23 @@ def plot_weekly_study_progress(study_df, daily_target=70):
             yanchor="bottom",
             y=1.02,
             xanchor="right",
-            x=1
+            x=1,
+            font=dict(color=COLOR_TEXT)
         ),
-        template='plotly_white',
-        plot_bgcolor=COLOR_BACKGROUND,
-        paper_bgcolor='white',
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0.05)',
         font=dict(
             family="Courier New, monospace",
-            color=COLOR_SECONDARY
+            color=COLOR_TEXT
+        ),
+        xaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
+        ),
+        yaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
         ),
         hovermode='x unified'
     )

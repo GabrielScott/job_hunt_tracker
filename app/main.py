@@ -1,298 +1,324 @@
 import streamlit as st
-import os
-import sys
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
-# Add the parent directory to sys.path to allow imports from the app package
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from app.utils.database import init_db
-from app.pages import dashboard, job_tracker, study_tracker, settings
-from app.components.header import display_header
-from app.components.footer import display_footer
-
-# Set page configuration
-st.set_page_config(
-    page_title="Job Hunt & Study Tracker",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Initialize database
-init_db()
-
-# Custom CSS for updated styling with new colors and font, square edges
-st.markdown("""
-<style>
-    /* Import Google Font - Courier Prime (serif) */
-    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
-
-    /* Global font styles */
-    * {
-        font-family: 'Courier Prime', monospace !important;
-    }
-
-    /* Main container styling */
-    .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
-
-    /* Button styling - square edges */
-    .stButton button {
-        background-color: #67597A;
-        color: #F4F7BE;
-        border: none;
-        border-radius: 0 !important;
-        transition: all 0.3s;
-    }
-
-    .stButton button:hover {
-        background-color: #E9724C;
-        color: white;
-    }
-
-    /* Form elements - square edges */
-    .stTextInput input, 
-    .stTextArea textarea, 
-    .stSelectbox > div > div, 
-    .stNumberInput input, 
-    .stDateInput input,
-    .stDateInput > div,
-    .stSelectbox > div,
-    [data-baseweb="select"] {
-        border-radius: 0 !important;
-        border: 2px solid #E5F77D !important;
-        color: #757761;
-    }
-
-    /* Dropdown menus */
-    [data-baseweb="popover"] {
-        border-radius: 0 !important;
-    }
-
-    /* Tab styling - square edges */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        background-color: #F4F7BE;
-        border: 2px solid #E5F77D;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        height: 4rem;
-        white-space: pre-wrap;
-        background-color: #F4F7BE;
-        border-radius: 0 !important;
-        margin-right: 0;
-        border-right: 2px solid #E5F77D;
-        color: #67597A;
-        font-weight: bold;
-    }
-
-    .stTabs [aria-selected="true"] {
-        background-color: #67597A;
-        color: #F4F7BE;
-    }
-
-    /* Metrics styling */
-    div[data-testid="stMetricValue"] {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #E9724C;
-    }
-
-    div[data-testid="stMetricLabel"] {
-        color: #757761;
-    }
-
-    /* Expander styling - square edges */
-    .stExpander {
-        border: 2px solid #E5F77D !important;
-        border-radius: 0 !important;
-        overflow: hidden;
-    }
-
-    .stExpander details {
-        background-color: #F4F7BE;
-    }
-
-    .stExpander summary {
-        background-color: #E5F77D;
-        color: #67597A;
-        font-weight: bold;
-        padding: 1rem;
-        border-radius: 0 !important;
-    }
-
-    /* Remove all rounded corners */
-    div, input, button, select, textarea, a {
-        border-radius: 0 !important;
-    }
-
-    /* Custom sidebar styling - square edges */
-    [data-testid="stSidebar"] {
-        background-color: #67597A;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1 {
-        color: #F4F7BE;
-    }
-
-    [data-testid="stSidebar"] .stInfo {
-        background-color: #E9724C;
-        color: white;
-        border-radius: 0 !important;
-    }
-
-    .sidebar-nav-button {
-        width: 100%;
-        text-align: left;
-        padding: 0.75rem 1rem;
-        margin: 0.2rem 0;
-        border-radius: 0 !important;
-        background-color: transparent;
-        border-left: 3px solid #E5F77D;
-        color: #F4F7BE;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .sidebar-nav-button:hover {
-        background-color: #E9724C;
-        border-left-color: #F4F7BE;
-    }
-
-    .sidebar-nav-button-active {
-        background-color: #E9724C;
-        color: white;
-        border-left-color: #F4F7BE;
-    }
-
-    /* Progress bars - square edges */
-    .stProgress > div > div {
-        background-color: #E9724C;
-        border-radius: 0 !important;
-    }
-
-    .stProgress > div {
-        border-radius: 0 !important;
-    }
-
-    /* Message containers - square edges */
-    .stInfo, .stSuccess, .stWarning, .stError {
-        border-radius: 0 !important;
-        padding: 1rem;
-        border-left: 4px solid;
-    }
-
-    .stInfo {
-        background-color: #F4F7BE;
-        color: #757761;
-        border-left-color: #E5F77D;
-    }
-
-    .stSuccess {
-        background-color: #F4F7BE;
-        color: #67597A;
-        border-left-color: #E5F77D;
-    }
-
-    .stWarning {
-        background-color: #F4F7BE;
-        color: #E9724C;
-        border-left-color: #E9724C;
-    }
-
-    .stError {
-        background-color: #F4F7BE;
-        color: #E9724C;
-        border-left-color: #E9724C;
-    }
-
-    /* Data frames */
-    [data-testid="stDataFrame"] table {
-        border: 2px solid #E5F77D;
-    }
-
-    [data-testid="stDataFrame"] th {
-        background-color: #67597A;
-        color: #F4F7BE;
-        font-family: 'Courier Prime', monospace !important;
-    }
-
-    [data-testid="stDataFrame"] td {
-        font-family: 'Courier Prime', monospace !important;
-    }
-
-    /* Hide default Streamlit navigation */
-    header {display: none !important;}
-    .stApp > header {display: none !important;}
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-
-    /* Hide any navigation tabs that might be auto-generated */
-    [data-testid="stSidebarNav"], 
-    [data-testid="collapsedControl"] {
-        display: none !important;
-    }
-
-    /* Ensure the sidebar is the only navigation */
-    section[data-testid="stSidebar"] {
-        display: block !important;
-        visibility: visible !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+from app.utils.database import get_all_jobs, get_study_logs
+from app.components.metrics import display_metrics, display_affirmation
+from app.components.charts import plot_applications_over_time, plot_status_distribution, plot_study_progress
 
 
-# Main App
-def main():
-    # Clear sidebar of any auto-generated navigation
-    st.sidebar.empty()
+def show():
+    """Display the main dashboard page."""
+    # Title is now handled by the header in main.py
+    # We use a smaller subtitle here if needed
+    st.markdown("### Your Dashboard Overview", unsafe_allow_html=True)
 
-    # Add our custom navigation
-    st.sidebar.title("Navigation")
+    # Get job application and study data
+    jobs_df = get_all_jobs()
+    study_df = get_study_logs()
 
-    # Store the current page in session state
-    if 'current_page' not in st.session_state:
-        st.session_state.current_page = "Dashboard"
+    # Convert date columns to datetime
+    if not jobs_df.empty:
+        jobs_df['date_applied'] = pd.to_datetime(jobs_df['date_applied'])
+        jobs_df['last_updated'] = pd.to_datetime(jobs_df['last_updated'])
 
-    # Create styled navigation buttons
-    for page_name in ["Dashboard", "Job Applications", "Study Tracker", "Settings"]:
-        # Determine if this button is active
-        is_active = st.session_state.current_page == page_name
+    if not study_df.empty:
+        study_df['date'] = pd.to_datetime(study_df['date'])
 
-        # Create the button with the appropriate styling
-        if st.sidebar.button(
-                page_name,
-                key=f"nav_{page_name}",
-                use_container_width=True,
-                type="primary" if is_active else "secondary"
-        ):
-            st.session_state.current_page = page_name
-            st.rerun()
+    # Use the metrics component to display key metrics
+    application_progress, study_progress = display_metrics(jobs_df, study_df)
 
-    # Display the custom header
-    display_header()
+    # Display affirmation in a clean styled box
+    st.markdown(
+        f"""
+        <div style="
+            background-color: #F4F7BE;
+            border-left: 4px solid #E5F77D;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            color: #67597A;
+            font-weight: bold;
+        ">
+            ✨ {display_affirmation(application_progress, study_progress)}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Display page based on selection
-    if st.session_state.current_page == "Dashboard":
-        dashboard.show()
-    elif st.session_state.current_page == "Job Applications":
-        job_tracker.show()
-    elif st.session_state.current_page == "Study Tracker":
-        study_tracker.show()
-    elif st.session_state.current_page == "Settings":
-        settings.show()
+    # Applications over time chart - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Application Trends</h3>",
+        unsafe_allow_html=True)
 
-    # Display the custom footer
-    display_footer()
+    if not jobs_df.empty:
+        # Chart container with transparent background and lime border
+        st.markdown(
+            """
+            <style>
+            .chart-container {
+                border: 2px solid #E5F77D;
+                padding: 10px;
+                margin-bottom: 20px;
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+            </style>
+            <div class="chart-container">
+            """,
+            unsafe_allow_html=True
+        )
+        fig = plot_applications_over_time(jobs_df)
+        # Update chart layout for dark/transparent background
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(color="#E5F77D")
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(
+            """
+            <div style="
+                background-color: #F4F7BE;
+                border: 2px solid #E5F77D;
+                padding: 15px;
+                text-align: center;
+                color: #67597A;
+                font-family: 'Courier New', monospace;
+            ">
+                📋 No application data available yet. Start adding job applications to see trends.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Sidebar footer
-    st.sidebar.markdown("---")
-    st.sidebar.info("Job Hunt & Study Tracker v1.0.1")
+    # Status distribution chart - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Application Status Distribution</h3>",
+        unsafe_allow_html=True)
 
+    if not jobs_df.empty and len(jobs_df['status'].unique()) > 1:
+        # Chart container with transparent background and lime border
+        st.markdown(
+            """
+            <div class="chart-container">
+            """,
+            unsafe_allow_html=True
+        )
+        fig = plot_status_distribution(jobs_df)
+        # Update chart layout for dark/transparent background
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(color="#E5F77D")
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(
+            """
+            <div style="
+                background-color: #F4F7BE;
+                border: 2px solid #E5F77D;
+                padding: 15px;
+                text-align: center;
+                color: #67597A;
+                font-family: 'Courier New', monospace;
+            ">
+                📊 Not enough application data with different statuses available yet.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-if __name__ == "__main__":
-    main()
+    # Study progress chart - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Study Progress</h3>",
+        unsafe_allow_html=True)
+
+    if not study_df.empty:
+        # Chart container with transparent background and lime border
+        st.markdown(
+            """
+            <div class="chart-container">
+            """,
+            unsafe_allow_html=True
+        )
+        fig = plot_study_progress(study_df)
+        # Update chart layout for dark/transparent background
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(color="#E5F77D")
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(
+            """
+            <div style="
+                background-color: #F4F7BE;
+                border: 2px solid #E5F77D;
+                padding: 15px;
+                text-align: center;
+                color: #67597A;
+                font-family: 'Courier New', monospace;
+            ">
+                📚 No study data available yet. Start logging your study time to see progress.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # Recent activities section - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Recent Activities</h3>",
+        unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Recent Applications Header
+        st.markdown(
+            """
+            <div style="
+                background-color: #67597A;
+                padding: 10px;
+                text-align: center;
+                color: #F4F7BE;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                border: 2px solid #E5F77D;
+                border-bottom: none;
+            ">
+                Recent Applications
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Recent Applications Content
+        if not jobs_df.empty:
+            # Make sure we have unique job entries by company and position
+            jobs_df['company_position'] = jobs_df['company'] + ' - ' + jobs_df['position']
+            recent_jobs = jobs_df.drop_duplicates(subset=['company_position']).sort_values('date_applied',
+                                                                                           ascending=False).head(5)
+
+            # Create a container div for the content
+            recent_container = '<div style="border: 2px solid #E5F77D; border-top: none; padding: 10px; height: 300px; overflow-y: auto;">'
+
+            for _, job in recent_jobs.iterrows():
+                job_date = job['date_applied'].strftime('%Y-%m-%d')
+
+                # Format notes with ellipsis if too long
+                notes = job['notes'] if job['notes'] else ""
+                if len(notes) > 100:
+                    notes = notes[:97] + "..."
+
+                recent_container += f"""
+                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5F77D;">
+                    <div style="font-weight: bold; color: #67597A;">{job['company']} - {job['position']} ({job['status']})</div>
+                    <div style="color: #757761;">Applied on: {job_date}</div>
+                """
+
+                if notes:
+                    recent_container += f'<div style="color: #757761; font-style: italic; margin-top: 5px;">Notes: {notes}</div>'
+
+                recent_container += '</div>'
+
+            recent_container += '</div>'
+            st.markdown(recent_container, unsafe_allow_html=True)
+        else:
+            # Empty state for no applications
+            st.markdown(
+                """
+                <div style="
+                    border: 2px solid #E5F77D;
+                    border-top: none;
+                    padding: 20px;
+                    text-align: center;
+                    color: #757761;
+                    height: 300px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: 'Courier New', monospace;
+                ">
+                    No recent job applications.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    with col2:
+        # Recent Study Sessions Header
+        st.markdown(
+            """
+            <div style="
+                background-color: #67597A;
+                padding: 10px;
+                text-align: center;
+                color: #F4F7BE;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                border: 2px solid #E5F77D;
+                border-bottom: none;
+            ">
+                Recent Study Sessions
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Recent Study Sessions Content
+        if not study_df.empty:
+            recent_study = study_df.sort_values('date', ascending=False).head(5)
+
+            # Create a container div for the content
+            study_container = '<div style="border: 2px solid #E5F77D; border-top: none; padding: 10px; height: 300px; overflow-y: auto;">'
+
+            for _, session in recent_study.iterrows():
+                session_date = session['date'].strftime('%Y-%m-%d')
+                hours = session['duration'] // 60
+                minutes = session['duration'] % 60
+
+                # Format notes
+                notes = session['notes'] if session['notes'] else ""
+
+                study_container += f"""
+                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5F77D;">
+                    <div style="font-weight: bold; color: #67597A;">{session_date}</div>
+                    <div style="color: #757761;">Studied for {hours}h {minutes}m</div>
+                """
+
+                if notes:
+                    study_container += f'<div style="color: #757761; font-style: italic; margin-top: 5px;">Notes: {notes}</div>'
+
+                study_container += '</div>'
+
+            study_container += '</div>'
+            st.markdown(study_container, unsafe_allow_html=True)
+        else:
+            # Empty state for no study sessions
+            st.markdown(
+                """
+                <div style="
+                    border: 2px solid #E5F77D;
+                    border-top: none;
+                    padding: 20px;
+                    text-align: center;
+                    color: #757761;
+                    height: 300px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: 'Courier New', monospace;
+                ">
+                    No recent study sessions.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )

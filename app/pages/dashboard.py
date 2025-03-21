@@ -48,8 +48,10 @@ def show():
         unsafe_allow_html=True
     )
 
-    # Applications over time chart
-    st.markdown("### Application Trends")
+    # Applications over time chart - with lime green header
+    st.markdown("<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Application Trends</h3>",
+                unsafe_allow_html=True)
+
     if not jobs_df.empty:
         fig = plot_applications_over_time(jobs_df)
         st.plotly_chart(fig, use_container_width=True)
@@ -70,8 +72,11 @@ def show():
             unsafe_allow_html=True
         )
 
-    # Status distribution chart
-    st.markdown("### Application Status Distribution")
+    # Status distribution chart - with lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Application Status Distribution</h3>",
+        unsafe_allow_html=True)
+
     if not jobs_df.empty and len(jobs_df['status'].unique()) > 1:
         fig = plot_status_distribution(jobs_df)
         st.plotly_chart(fig, use_container_width=True)
@@ -92,8 +97,10 @@ def show():
             unsafe_allow_html=True
         )
 
-    # Study progress chart
-    st.markdown("### Study Progress")
+    # Study progress chart - with lime green header
+    st.markdown("<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Study Progress</h3>",
+                unsafe_allow_html=True)
+
     if not study_df.empty:
         fig = plot_study_progress(study_df)
         st.plotly_chart(fig, use_container_width=True)
@@ -114,12 +121,14 @@ def show():
             unsafe_allow_html=True
         )
 
-    # Recent activities section with custom styling
-    st.markdown("### Recent Activities")
+    # Recent activities section with custom styling - with lime green header
+    st.markdown("<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Recent Activities</h3>",
+                unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
+        # Recent Applications Header
         st.markdown(
             """
             <div style="
@@ -138,57 +147,61 @@ def show():
             unsafe_allow_html=True
         )
 
-        recent_container = """
-        <div style="
-            border: 2px solid #E5F77D;
-            border-top: none;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            height: 300px;
-            overflow-y: auto;
-        ">
-        """
-
+        # Recent Applications Content
         if not jobs_df.empty:
             # Make sure we have unique job entries by company and position
             jobs_df['company_position'] = jobs_df['company'] + ' - ' + jobs_df['position']
             recent_jobs = jobs_df.drop_duplicates(subset=['company_position']).sort_values('date_applied',
                                                                                            ascending=False).head(5)
 
+            # Create a container div for the content
+            recent_container = '<div style="border: 2px solid #E5F77D; border-top: none; padding: 10px; height: 300px; overflow-y: auto;">'
+
             for _, job in recent_jobs.iterrows():
+                job_date = job['date_applied'].strftime('%Y-%m-%d')
+
+                # Format notes with ellipsis if too long
+                notes = job['notes'] if job['notes'] else ""
+                if len(notes) > 100:
+                    notes = notes[:97] + "..."
+
                 recent_container += f"""
                 <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5F77D;">
-                    <div style="font-weight: bold; color: #67597A;">
-                        {job['company']} - {job['position']} ({job['status']})
-                    </div>
-                    <div style="color: #757761;">
-                        Applied on: {job['date_applied'].strftime('%Y-%m-%d')}
-                    </div>
+                    <div style="font-weight: bold; color: #67597A;">{job['company']} - {job['position']} ({job['status']})</div>
+                    <div style="color: #757761;">Applied on: {job_date}</div>
                 """
 
-                if job['notes']:
-                    # Truncate notes if they are too long for the dashboard view
-                    display_notes = job['notes']
-                    if len(display_notes) > 100:  # Limit to 100 characters
-                        display_notes = display_notes[:97] + "..."
-                    recent_container += f"""
-                    <div style="color: #757761; font-style: italic; margin-top: 5px;">
-                        Notes: {display_notes}
-                    </div>
-                    """
+                if notes:
+                    recent_container += f'<div style="color: #757761; font-style: italic; margin-top: 5px;">Notes: {notes}</div>'
 
-                recent_container += "</div>"
+                recent_container += '</div>'
+
+            recent_container += '</div>'
+            st.markdown(recent_container, unsafe_allow_html=True)
         else:
-            recent_container += """
-            <div style="text-align: center; padding: 20px; color: #757761;">
-                No recent job applications.
-            </div>
-            """
-
-        recent_container += "</div>"
-        st.markdown(recent_container, unsafe_allow_html=True)
+            # Empty state for no applications
+            st.markdown(
+                """
+                <div style="
+                    border: 2px solid #E5F77D;
+                    border-top: none;
+                    padding: 20px;
+                    text-align: center;
+                    color: #757761;
+                    height: 300px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: 'Courier New', monospace;
+                ">
+                    No recent job applications.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
     with col2:
+        # Recent Study Sessions Header
         st.markdown(
             """
             <div style="
@@ -207,46 +220,52 @@ def show():
             unsafe_allow_html=True
         )
 
-        study_container = """
-        <div style="
-            border: 2px solid #E5F77D;
-            border-top: none;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            height: 300px;
-            overflow-y: auto;
-        ">
-        """
-
+        # Recent Study Sessions Content
         if not study_df.empty:
             recent_study = study_df.sort_values('date', ascending=False).head(5)
+
+            # Create a container div for the content
+            study_container = '<div style="border: 2px solid #E5F77D; border-top: none; padding: 10px; height: 300px; overflow-y: auto;">'
+
             for _, session in recent_study.iterrows():
+                session_date = session['date'].strftime('%Y-%m-%d')
                 hours = session['duration'] // 60
                 minutes = session['duration'] % 60
+
+                # Format notes
+                notes = session['notes'] if session['notes'] else ""
+
                 study_container += f"""
                 <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5F77D;">
-                    <div style="font-weight: bold; color: #67597A;">
-                        {session['date'].strftime('%Y-%m-%d')}
-                    </div>
-                    <div style="color: #757761;">
-                        Studied for {hours}h {minutes}m
-                    </div>
+                    <div style="font-weight: bold; color: #67597A;">{session_date}</div>
+                    <div style="color: #757761;">Studied for {hours}h {minutes}m</div>
                 """
 
-                if session['notes']:
-                    study_container += f"""
-                    <div style="color: #757761; font-style: italic; margin-top: 5px;">
-                        Notes: {session['notes']}
-                    </div>
-                    """
+                if notes:
+                    study_container += f'<div style="color: #757761; font-style: italic; margin-top: 5px;">Notes: {notes}</div>'
 
-                study_container += "</div>"
+                study_container += '</div>'
+
+            study_container += '</div>'
+            st.markdown(study_container, unsafe_allow_html=True)
         else:
-            study_container += """
-            <div style="text-align: center; padding: 20px; color: #757761;">
-                No recent study sessions.
-            </div>
-            """
-
-        study_container += "</div>"
-        st.markdown(study_container, unsafe_allow_html=True)
+            # Empty state for no study sessions
+            st.markdown(
+                """
+                <div style="
+                    border: 2px solid #E5F77D;
+                    border-top: none;
+                    padding: 20px;
+                    text-align: center;
+                    color: #757761;
+                    height: 300px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: 'Courier New', monospace;
+                ">
+                    No recent study sessions.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
