@@ -1,12 +1,13 @@
 import streamlit as st
 import pandas as pd
 import json
-import os
+from datetime import datetime, timedelta
 from pathlib import Path
-from io import BytesIO
 
-from app.utils.database import get_all_jobs, get_study_logs, reset_job_data, reset_study_data, reset_all_data
-from app.utils.file_handler import export_dataframe
+from app.utils.database import get_study_logs
+from app.components.forms import study_log_form
+from app.components.charts import plot_study_progress, plot_weekly_study_progress
+from app.components.metrics import calculate_streak
 
 
 # Load configuration
@@ -18,218 +19,155 @@ def get_config():
     else:
         # Default configuration
         return {
-            "app": {
-                "name": "Job Hunt & Study Tracker",
-                "version": "1.0.0"
+            "study_tracking": {
+                "daily_target_minutes": 70,
+                "weekly_target_days": 5
             }
         }
 
 
 config = get_config()
+daily_target = config.get('study_tracking', {}).get('daily_target_minutes', 70)
 
 
 def show():
-    """Display the settings page."""
-    st.title("Settings")
+    """Display the study tracker page."""
+    st.title("SOA Study Tracker")
 
-    # App information
-    st.sidebar.markdown("---")
-    app_name = config.get('app', {}).get('name', "Job Hunt & Study Tracker")
-    app_version = config.get('app', {}).get('version', "1.0.0")
-    st.sidebar.info(f"{app_name} v{app_version}")
+    # Create tabs for logging study time and viewing progress
+    tab1, tab2, tab3 = st.tabs(["Log Study Time", "Daily Progress", "Weekly Progress"])
 
-    # Create tabs for different settings sections
-    tab1, tab2, tab3 = st.tabs(["Export Data", "Reset Data", "Application Settings"])
+    # Get study data from database
+    study_df = get_study_logs()
+
+    # Convert date column to datetime if it's not already
+    if not study_df.empty:
+        study_df['date'] = pd.to_datetime(study_df['date'])
 
     with tab1:
-        show_export_options()
+        # Show the study log form
+        log_added = study_log_form()
+        if log_added:
+            # Reset the form by rerunning the app
+            st.experimental_rerun()
 
     with tab2:
-        show_reset_options()
+        st.header("Daily Study Progress")
+
+        if not study_df.empty:
+            # Calculate and display streak
+            streak = calculate_streak(study_df)
+
+            # Display metrics in columns
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                total_study_time = study_df['duration'].sum()
+                hours = total_study_time // 60
+                minutes = total_study_time % 60
+                st.metric("Total Study Time", f"{hours}h {minutes}m")
+
+            with col2:
+                daily_average = study_df.groupby(study_df['date'].dt.date)['duration'].sum().mean()
+                avg_hours = int(daily_average // 60)
+                avg_minutes = int(daily_average % 60)
+                st.metric("Daily Average", f"{avg_hours}h {avg_minutes}m")
+
+            with col3:
+                st.metric("Current Streak", f"{streak} days")
+
+            # Display progress against daily target
+            fig = plot_study_progress(study_df, daily_target)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Study log table
+            st.subheader("Study Log")
+            log_view = study_df.sort_values('date', ascending=False).copy()
+            log_view['date'] = log_view['date'].dt.date
+            log_view['hours'] = log_view['duration'] // 60
+            log_view['minutes'] = log_view['duration'] % 60
+            log_view['time'] = log_view.apply(lambda x: f"{x['hours']}h {x['minutes']}m", axis=1)
+
+            # Create a more readable dataframe for display
+            display_df = log_view[['date', 'time', 'notes']].rename(
+                columns={'date': 'Date', 'time': 'Study Time', 'notes': 'Notes'}
+            )
+
+            st.dataframe(display_df, use_container_width=True)
+        else:
+            st.info("No study data recorded yet. Use the 'Log Study Time' tab to get started!")
 
     with tab3:
-        show_app_settings()
+        st.header("Weekly Study Progress")
 
+        if not study_df.empty:
+            # Weekly progress chart
+            fig = plot_weekly_study_progress(study_df, daily_target)
+            st.plotly_chart(fig, use_container_width=True)
 
-def show_export_options():
-    """Display options for exporting data."""
-    st.header("Export Data")
+            # Weekly summary statistics
+            st.subheader("Weekly Summary")
 
-    export_format = st.radio("Export Format", ["CSV", "Excel"])
+            # Create a weekly summary dataframe
+            weekly_df = study_df.copy()
+            weekly_df['week'] = weekly_df['date'].dt.isocalendar().week
+            weekly_df['year'] = weekly_df['date'].dt.isocalendar().year
+            weekly_df['year_week'] = weekly_df['year'].astype(str) + '-W' + weekly_df['week'].astype(str)
 
-    col1, col2 = st.columns(2)
+            weekly_summary = weekly_df.groupby('year_week')['duration'].agg(['sum', 'count']).reset_index()
+            weekly_summary.columns = ['Week', 'Total Minutes', 'Study Days']
 
-    with col1:
-        if st.button("Export Job Applications"):
-            jobs_df = get_all_jobs()
+            # Calculate target and percentage
+            weekly_target_minutes = daily_target * 7
+            weekly_summary['Target'] = weekly_target_minutes
+            weekly_summary['Percentage'] = (weekly_summary['Total Minutes'] / weekly_target_minutes * 100).round(1)
 
-            if not jobs_df.empty:
-                filename = "job_applications"
-                st.markdown(
-                    export_dataframe(jobs_df, filename, export_format.lower()),
-                    unsafe_allow_html=True
-                )
+            # Format for display
+            weekly_summary['Hours'] = (weekly_summary['Total Minutes'] // 60).astype(int)
+            weekly_summary['Minutes'] = (weekly_summary['Total Minutes'] % 60).astype(int)
+            weekly_summary['Time'] = weekly_summary.apply(lambda x: f"{x['Hours']}h {x['Minutes']}m", axis=1)
+
+            # Final display dataframe
+            display_weekly = weekly_summary[['Week', 'Time', 'Study Days', 'Percentage']].rename(
+                columns={'Time': 'Total Time', 'Percentage': 'Target %'}
+            )
+
+            # Sort by week (most recent first)
+            display_weekly = display_weekly.sort_values('Week', ascending=False)
+
+            st.dataframe(display_weekly, use_container_width=True)
+
+            # Display study consistency information
+            st.subheader("Study Consistency")
+
+            # Get data for the last 4 weeks
+            today = datetime.now().date()
+            four_weeks_ago = today - timedelta(days=28)
+            recent_study = study_df[study_df['date'].dt.date >= four_weeks_ago]
+
+            if not recent_study.empty:
+                # Calculate consistency metrics
+                study_days = recent_study['date'].dt.date.nunique()
+                total_days = (today - four_weeks_ago).days + 1
+                consistency_percentage = (study_days / total_days) * 100
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.metric("Study Days (Last 4 Weeks)", f"{study_days}/{total_days}")
+
+                with col2:
+                    st.metric("Consistency", f"{consistency_percentage:.1f}%")
+
+                # Show a message based on consistency
+                if consistency_percentage >= 80:
+                    st.success("Excellent consistency! You're studying regularly, which is key to success.")
+                elif consistency_percentage >= 50:
+                    st.info("Good consistency. Try to increase your study frequency for better results.")
+                else:
+                    st.warning(
+                        "Your study consistency could be improved. Regular study sessions, even short ones, can make a big difference.")
             else:
-                st.info("No job application data to export.")
-
-    with col2:
-        if st.button("Export Study Log"):
-            study_df = get_study_logs()
-
-            if not study_df.empty:
-                filename = "study_log"
-                st.markdown(
-                    export_dataframe(study_df, filename, export_format.lower()),
-                    unsafe_allow_html=True
-                )
-            else:
-                st.info("No study log data to export.")
-
-    # Export all data
-    if st.button("Export All Data"):
-        jobs_df = get_all_jobs()
-        study_df = get_study_logs()
-
-        if not jobs_df.empty or not study_df.empty:
-            if export_format.lower() == "csv":
-                # For CSV, we'll create separate files
-                download_links = []
-
-                if not jobs_df.empty:
-                    download_links.append(export_dataframe(jobs_df, "job_applications", "csv"))
-
-                if not study_df.empty:
-                    download_links.append(export_dataframe(study_df, "study_log", "csv"))
-
-                for link in download_links:
-                    st.markdown(link, unsafe_allow_html=True)
-            else:
-                # For Excel, we'll create a single file with multiple sheets
-                output = BytesIO()
-                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                    if not jobs_df.empty:
-                        jobs_df.to_excel(writer, sheet_name='Job Applications', index=False)
-
-                    if not study_df.empty:
-                        study_df.to_excel(writer, sheet_name='Study Log', index=False)
-
-                output.seek(0)
-
-                # Create download link
-                import base64
-                b64 = base64.b64encode(output.read()).decode()
-                href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="job_hunt_tracker_data.xlsx">Download Excel File</a>'
-                st.markdown(href, unsafe_allow_html=True)
+                st.info("Not enough recent data to calculate study consistency.")
         else:
-            st.info("No data to export.")
-
-
-def show_reset_options():
-    """Display options for resetting data."""
-    st.header("Reset Data")
-    st.warning("Warning: This will delete your data. This action cannot be undone!")
-
-    reset_col1, reset_col2 = st.columns(2)
-
-    with reset_col1:
-        if st.button("Reset Job Applications"):
-            with st.spinner("Resetting job application data..."):
-                reset_job_data()
-                st.success("Job application data has been reset!")
-
-    with reset_col2:
-        if st.button("Reset Study Log"):
-            with st.spinner("Resetting study log data..."):
-                reset_study_data()
-                st.success("Study log data has been reset!")
-
-    # Add additional confirmation for resetting all data
-    st.subheader("Reset All Data")
-
-    # Create a confirmation check
-    confirm_reset = st.checkbox("I understand this will delete ALL my data and cannot be undone.")
-
-    if confirm_reset:
-        if st.button("Reset ALL Data"):
-            with st.spinner("Resetting all data..."):
-                reset_all_data()
-                st.success("All data has been reset!")
-
-
-def show_app_settings():
-    """Display application settings."""
-    st.header("Application Settings")
-
-    # Load current configuration
-    current_config = get_config()
-
-    # Study settings
-    st.subheader("Study Settings")
-
-    daily_target = st.number_input(
-        "Daily Study Target (minutes)",
-        min_value=5,
-        max_value=480,
-        value=current_config.get('study_tracking', {}).get('daily_target_minutes', 70),
-        step=5
-    )
-
-    weekly_target_days = st.number_input(
-        "Weekly Target Days",
-        min_value=1,
-        max_value=7,
-        value=current_config.get('study_tracking', {}).get('weekly_target_days', 5),
-        step=1
-    )
-
-    # Job application settings
-    st.subheader("Job Application Settings")
-
-    weekly_goal = st.number_input(
-        "Weekly Application Goal",
-        min_value=1,
-        max_value=50,
-        value=current_config.get('job_tracking', {}).get('weekly_goal', 5),
-        step=1
-    )
-
-    # Status options (text area for easier editing)
-    default_statuses = "\n".join(current_config.get('job_tracking', {}).get('statuses', [
-        "Applied", "No Response", "Rejected", "Screening Call",
-        "Interview", "Second Interview", "Final Interview",
-        "Offer", "Accepted", "Declined"
-    ]))
-
-    status_options = st.text_area(
-        "Status Options (one per line)",
-        value=default_statuses,
-        height=200
-    )
-
-    # Save button
-    if st.button("Save Settings"):
-        try:
-            # Parse status options
-            statuses = [s.strip() for s in status_options.split('\n') if s.strip()]
-
-            # Update configuration
-            current_config['study_tracking'] = {
-                'daily_target_minutes': daily_target,
-                'weekly_target_days': weekly_target_days
-            }
-
-            current_config['job_tracking'] = {
-                'weekly_goal': weekly_goal,
-                'statuses': statuses
-            }
-
-            # Save configuration
-            config_path = Path(__file__).parents[2] / 'config' / 'app_config.json'
-            config_path.parent.mkdir(parents=True, exist_ok=True)
-
-            with open(config_path, 'w') as f:
-                json.dump(current_config, f, indent=4)
-
-            st.success("Settings saved successfully!")
-        except Exception as e:
-            st.error(f"Error saving settings: {str(e)}")
+            st.info("No study data recorded yet. Use the 'Log Study Time' tab to get started!")
