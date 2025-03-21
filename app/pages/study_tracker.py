@@ -49,7 +49,7 @@ def show():
         log_added = study_log_form()
         if log_added:
             # Reset the form by rerunning the app
-            st.experimental_rerun()
+            st.rerun()  # Changed from experimental_rerun() to rerun()
 
     with tab2:
         st.header("Daily Study Progress")

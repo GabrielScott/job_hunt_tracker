@@ -11,7 +11,9 @@ from app.components.charts import plot_applications_over_time, plot_status_distr
 
 def show():
     """Display the main dashboard page."""
-    st.title("Job Hunt & Study Progress Dashboard")
+    # Title is now handled by the header in main.py
+    # We use a smaller subtitle here if needed
+    st.markdown("### Your Dashboard Overview", unsafe_allow_html=True)
 
     # Get job application and study data
     jobs_df = get_all_jobs()
@@ -25,47 +27,26 @@ def show():
     if not study_df.empty:
         study_df['date'] = pd.to_datetime(study_df['date'])
 
-    # Calculate metrics
-    total_applications = len(jobs_df) if not jobs_df.empty else 0
-    interview_count = len(jobs_df[jobs_df['status'].isin(
-        ['Interview', 'Second Interview', 'Final Interview'])]) if not jobs_df.empty else 0
+    # Use the metrics component to display key metrics
+    application_progress, study_progress = display_metrics(jobs_df, study_df)
 
-    # Calculate study progress for the last 7 days
-    today = datetime.now().date()
-    last_week = today - timedelta(days=7)
-
-    recent_study = study_df[
-        pd.to_datetime(study_df['date']).dt.date >= last_week] if not study_df.empty else pd.DataFrame()
-    total_minutes = recent_study['duration'].sum() if not recent_study.empty else 0
-
-    daily_target = 70  # 1h10m in minutes
-    weekly_target = daily_target * 7
-    study_progress = min(total_minutes / weekly_target, 1) if weekly_target > 0 else 0
-
-    # Weekly application goal (assuming 5 applications per week)
-    weekly_goal = 5
-    recent_applications = len(
-        jobs_df[pd.to_datetime(jobs_df['date_applied']).dt.date >= last_week]) if not jobs_df.empty else 0
-    application_progress = min(recent_applications / weekly_goal, 1) if weekly_goal > 0 else 0
-
-    # Display metrics in columns
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric("Total Applications", total_applications)
-
-    with col2:
-        st.metric("Interview Rate", f"{interview_count}/{total_applications}" if total_applications > 0 else "0/0")
-
-    with col3:
-        st.metric("Weekly Study Progress", f"{int(study_progress * 100)}%")
-
-    with col4:
-        st.metric("Weekly Application Goal", f"{recent_applications}/{weekly_goal}")
-
-    # Display affirmation
-    st.markdown("### Daily Affirmation")
-    st.info(display_affirmation(application_progress, study_progress))
+    # Display affirmation in a clean styled box
+    st.markdown(
+        f"""
+        <div style="
+            background-color: #F4F7BE;
+            border-left: 4px solid #E5F77D;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            color: #67597A;
+            font-weight: bold;
+        ">
+            ✨ {display_affirmation(application_progress, study_progress)}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Applications over time chart
     st.markdown("### Application Trends")
@@ -73,7 +54,21 @@ def show():
         fig = plot_applications_over_time(jobs_df)
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.write("No application data available yet. Start adding job applications to see trends.")
+        st.markdown(
+            """
+            <div style="
+                background-color: #F4F7BE;
+                border: 2px solid #E5F77D;
+                padding: 15px;
+                text-align: center;
+                color: #67597A;
+                font-family: 'Courier New', monospace;
+            ">
+                📋 No application data available yet. Start adding job applications to see trends.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # Status distribution chart
     st.markdown("### Application Status Distribution")
@@ -81,52 +76,177 @@ def show():
         fig = plot_status_distribution(jobs_df)
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.write("Not enough application data with different statuses available yet.")
+        st.markdown(
+            """
+            <div style="
+                background-color: #F4F7BE;
+                border: 2px solid #E5F77D;
+                padding: 15px;
+                text-align: center;
+                color: #67597A;
+                font-family: 'Courier New', monospace;
+            ">
+                📊 Not enough application data with different statuses available yet.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     # Study progress chart
     st.markdown("### Study Progress")
     if not study_df.empty:
-        fig = plot_study_progress(study_df, daily_target)
+        fig = plot_study_progress(study_df)
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.write("No study data available yet. Start logging your study time to see progress.")
+        st.markdown(
+            """
+            <div style="
+                background-color: #F4F7BE;
+                border: 2px solid #E5F77D;
+                padding: 15px;
+                text-align: center;
+                color: #67597A;
+                font-family: 'Courier New', monospace;
+            ">
+                📚 No study data available yet. Start logging your study time to see progress.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Recent activities
+    # Recent activities section with custom styling
     st.markdown("### Recent Activities")
 
-    tab1, tab2 = st.tabs(["Recent Applications", "Recent Study Sessions"])
+    col1, col2 = st.columns(2)
 
-    with tab1:
+    with col1:
+        st.markdown(
+            """
+            <div style="
+                background-color: #67597A;
+                padding: 10px;
+                text-align: center;
+                color: #F4F7BE;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                border: 2px solid #E5F77D;
+                border-bottom: none;
+            ">
+                Recent Applications
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        recent_container = """
+        <div style="
+            border: 2px solid #E5F77D;
+            border-top: none;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            height: 300px;
+            overflow-y: auto;
+        ">
+        """
+
         if not jobs_df.empty:
             # Make sure we have unique job entries by company and position
-            # Since job_id is not visible to users, we'll use company+position as a proxy for uniqueness
-            # This will help eliminate any visual duplicates
             jobs_df['company_position'] = jobs_df['company'] + ' - ' + jobs_df['position']
             recent_jobs = jobs_df.drop_duplicates(subset=['company_position']).sort_values('date_applied',
                                                                                            ascending=False).head(5)
 
             for _, job in recent_jobs.iterrows():
-                st.markdown(f"**{job['company']} - {job['position']}** ({job['status']})")
-                st.markdown(f"Applied on: {job['date_applied'].strftime('%Y-%m-%d')}")
+                recent_container += f"""
+                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5F77D;">
+                    <div style="font-weight: bold; color: #67597A;">
+                        {job['company']} - {job['position']} ({job['status']})
+                    </div>
+                    <div style="color: #757761;">
+                        Applied on: {job['date_applied'].strftime('%Y-%m-%d')}
+                    </div>
+                """
+
                 if job['notes']:
                     # Truncate notes if they are too long for the dashboard view
                     display_notes = job['notes']
                     if len(display_notes) > 100:  # Limit to 100 characters
                         display_notes = display_notes[:97] + "..."
-                    st.markdown(f"Notes: {display_notes}")
-                st.markdown("---")
-        else:
-            st.write("No recent job applications.")
+                    recent_container += f"""
+                    <div style="color: #757761; font-style: italic; margin-top: 5px;">
+                        Notes: {display_notes}
+                    </div>
+                    """
 
-    with tab2:
+                recent_container += "</div>"
+        else:
+            recent_container += """
+            <div style="text-align: center; padding: 20px; color: #757761;">
+                No recent job applications.
+            </div>
+            """
+
+        recent_container += "</div>"
+        st.markdown(recent_container, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(
+            """
+            <div style="
+                background-color: #67597A;
+                padding: 10px;
+                text-align: center;
+                color: #F4F7BE;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                border: 2px solid #E5F77D;
+                border-bottom: none;
+            ">
+                Recent Study Sessions
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        study_container = """
+        <div style="
+            border: 2px solid #E5F77D;
+            border-top: none;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            height: 300px;
+            overflow-y: auto;
+        ">
+        """
+
         if not study_df.empty:
             recent_study = study_df.sort_values('date', ascending=False).head(5)
             for _, session in recent_study.iterrows():
                 hours = session['duration'] // 60
                 minutes = session['duration'] % 60
-                st.markdown(f"**{session['date'].strftime('%Y-%m-%d')}** - Studied for {hours}h {minutes}m")
+                study_container += f"""
+                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5F77D;">
+                    <div style="font-weight: bold; color: #67597A;">
+                        {session['date'].strftime('%Y-%m-%d')}
+                    </div>
+                    <div style="color: #757761;">
+                        Studied for {hours}h {minutes}m
+                    </div>
+                """
+
                 if session['notes']:
-                    st.markdown(f"Notes: {session['notes']}")
-                st.markdown("---")
+                    study_container += f"""
+                    <div style="color: #757761; font-style: italic; margin-top: 5px;">
+                        Notes: {session['notes']}
+                    </div>
+                    """
+
+                study_container += "</div>"
         else:
-            st.write("No recent study sessions.")
+            study_container += """
+            <div style="text-align: center; padding: 20px; color: #757761;">
+                No recent study sessions.
+            </div>
+            """
+
+        study_container += "</div>"
+        st.markdown(study_container, unsafe_allow_html=True)

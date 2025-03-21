@@ -160,8 +160,8 @@ def get_progress_color(progress):
         str: A color code
     """
     if progress >= 0.8:
-        return "#59A14F"  # Green
+        return "#E5F77D"  # Bright lime - success
     elif progress >= 0.5:
-        return "#F28E2B"  # Orange
+        return "#E9724C"  # Coral - warning/caution
     else:
-        return "#E15759"  # Red
+        return "#67597A"  # Deep purple - needs improvement

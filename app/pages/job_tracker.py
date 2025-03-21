@@ -56,7 +56,7 @@ def show():
         job_added = job_application_form()
         if job_added:
             # Reset the form by rerunning the app
-            st.experimental_rerun()
+            st.rerun()  # Changed from experimental_rerun() to rerun()
 
     with tab2:
         st.header("View and Update Job Applications")
@@ -191,7 +191,7 @@ def update_job_details(job):
             )
 
             st.success("Job application updated!")
-            st.experimental_rerun()
+            st.rerun()  # Changed from experimental_rerun() to rerun()
 
     # Delete button with confirmation
     with col2:
@@ -222,9 +222,9 @@ def update_job_details(job):
 
                 st.success("Job application deleted successfully!")
                 st.session_state[f"confirm_delete_{job_id}"] = False
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun() to rerun()
 
         with col2:
             if st.button("Cancel", key=f"confirm_no_{job_id}", type="secondary"):
                 st.session_state[f"confirm_delete_{job_id}"] = False
-                st.experimental_rerun()
+                st.rerun()  # Changed from experimental_rerun() to rerun()

@@ -4,6 +4,14 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 
+# New color palette
+COLOR_PRIMARY = "#67597A"     # Deep purple
+COLOR_SECONDARY = "#757761"   # Olive gray
+COLOR_ACCENT = "#E9724C"      # Coral orange
+COLOR_SUCCESS = "#E5F77D"     # Bright lime
+COLOR_BACKGROUND = "#F4F7BE"  # Light cream
+
+
 def plot_applications_over_time(jobs_df):
     """
     Create a chart showing job applications over time.
@@ -31,20 +39,20 @@ def plot_applications_over_time(jobs_df):
         # Recalculate cumulative after filling missing dates
         jobs_by_date['Cumulative'] = jobs_by_date['Applications'].cumsum()
 
-    # Create the chart
+    # Create the chart with new color scheme
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=jobs_by_date['Date'],
         y=jobs_by_date['Applications'],
         name='Daily Applications',
-        marker_color='#4C78A8'
+        marker_color=COLOR_PRIMARY
     ))
     fig.add_trace(go.Scatter(
         x=jobs_by_date['Date'],
         y=jobs_by_date['Cumulative'],
         name='Cumulative',
         mode='lines+markers',
-        line=dict(color='#72B7B2', width=3)
+        line=dict(color=COLOR_ACCENT, width=3)
     ))
 
     fig.update_layout(
@@ -58,7 +66,13 @@ def plot_applications_over_time(jobs_df):
             xanchor="right",
             x=1
         ),
-        template='plotly_white'
+        template='plotly_white',
+        plot_bgcolor=COLOR_BACKGROUND,
+        paper_bgcolor='white',
+        font=dict(
+            family="Courier New, monospace",
+            color=COLOR_SECONDARY
+        )
     )
 
     return fig
@@ -77,22 +91,22 @@ def plot_status_distribution(jobs_df):
     status_counts = jobs_df['status'].value_counts().reset_index()
     status_counts.columns = ['Status', 'Count']
 
-    # Define a custom color sequence for different statuses
+    # Define a custom color sequence for different statuses using our palette
     color_map = {
-        'Applied': '#4C78A8',
-        'No Response': '#F28E2B',
-        'Rejected': '#E15759',
-        'Screening Call': '#76B7B2',
-        'Interview': '#59A14F',
-        'Second Interview': '#499894',
-        'Final Interview': '#4E79A7',
-        'Offer': '#B07AA1',
-        'Accepted': '#9D7660',
-        'Declined': '#D3D3D3'
+        'Applied': COLOR_PRIMARY,
+        'No Response': COLOR_SECONDARY,
+        'Rejected': COLOR_ACCENT,
+        'Screening Call': COLOR_SUCCESS,
+        'Interview': "#8F9973",  # Darker olive
+        'Second Interview': "#938BA1",  # Lighter purple
+        'Final Interview': "#79695C",  # Brown shade
+        'Offer': "#F6D300",  # Gold
+        'Accepted': "#AEDB39",  # Lime green
+        'Declined': "#FF9770"   # Light coral
     }
 
     # Get colors for the statuses in our data
-    colors = [color_map.get(status, '#B6992D') for status in status_counts['Status']]
+    colors = [color_map.get(status, COLOR_ACCENT) for status in status_counts['Status']]
 
     fig = px.pie(
         status_counts,
@@ -116,7 +130,12 @@ def plot_status_distribution(jobs_df):
             xanchor="center",
             x=0.5
         ),
-        margin=dict(t=60, b=60, l=20, r=20)
+        margin=dict(t=60, b=60, l=20, r=20),
+        paper_bgcolor='white',
+        font=dict(
+            family="Courier New, monospace",
+            color=COLOR_SECONDARY
+        )
     )
 
     return fig
@@ -152,7 +171,7 @@ def plot_study_progress(study_df, daily_target=70):
     # Mark which days met the target
     study_by_date['Target Met'] = study_by_date['Minutes'] >= daily_target
 
-    # Create the chart
+    # Create the chart with new color scheme
     fig = go.Figure()
 
     # Add target line
@@ -161,15 +180,15 @@ def plot_study_progress(study_df, daily_target=70):
         y=[daily_target] * len(study_by_date),
         mode='lines',
         name=f'Target ({daily_target} min)',
-        line=dict(color='red', width=2, dash='dash')
+        line=dict(color=COLOR_ACCENT, width=2, dash='dash')
     ))
 
-    # Add bars for study time
+    # Add bars for study time with updated colors
     fig.add_trace(go.Bar(
         x=study_by_date['Date'],
         y=study_by_date['Minutes'],
         name='Study Minutes',
-        marker_color=study_by_date['Target Met'].map({True: '#59A14F', False: '#E15759'})
+        marker_color=study_by_date['Target Met'].map({True: COLOR_SUCCESS, False: COLOR_PRIMARY})
     ))
 
     # Calculate 7-day moving average
@@ -181,7 +200,7 @@ def plot_study_progress(study_df, daily_target=70):
         y=study_by_date['7-Day Avg'],
         mode='lines',
         name='7-Day Average',
-        line=dict(color='#4C78A8', width=3)
+        line=dict(color=COLOR_SECONDARY, width=3)
     ))
 
     fig.update_layout(
@@ -196,6 +215,12 @@ def plot_study_progress(study_df, daily_target=70):
             x=1
         ),
         template='plotly_white',
+        plot_bgcolor=COLOR_BACKGROUND,
+        paper_bgcolor='white',
+        font=dict(
+            family="Courier New, monospace",
+            color=COLOR_SECONDARY
+        ),
         hovermode='x unified'
     )
 
@@ -219,7 +244,13 @@ def plot_weekly_study_progress(study_df, daily_target=70):
         fig.update_layout(
             title='Weekly Study Progress',
             xaxis_title='Week',
-            yaxis_title='Minutes'
+            yaxis_title='Minutes',
+            plot_bgcolor=COLOR_BACKGROUND,
+            paper_bgcolor='white',
+            font=dict(
+                family="Courier New, monospace",
+                color=COLOR_SECONDARY
+            )
         )
         return fig
 
@@ -243,14 +274,14 @@ def plot_weekly_study_progress(study_df, daily_target=70):
     # Determine if target was met
     weekly_study['target_met'] = weekly_study['duration'] >= weekly_target
 
-    # Create the chart
+    # Create the chart with new color scheme
     fig = go.Figure()
 
     # Add bars for weekly study time
     fig.add_trace(go.Bar(
         x=weekly_study['week_label'],
         y=weekly_study['duration'],
-        marker_color=weekly_study['target_met'].map({True: '#59A14F', False: '#E15759'}),
+        marker_color=weekly_study['target_met'].map({True: COLOR_SUCCESS, False: COLOR_PRIMARY}),
         name='Study Minutes'
     ))
 
@@ -260,7 +291,7 @@ def plot_weekly_study_progress(study_df, daily_target=70):
         y=[weekly_target] * len(weekly_study),
         mode='lines',
         name=f'Weekly Target ({weekly_target} min)',
-        line=dict(color='black', dash='dash')
+        line=dict(color=COLOR_ACCENT, dash='dash')
     ))
 
     fig.update_layout(
@@ -275,6 +306,12 @@ def plot_weekly_study_progress(study_df, daily_target=70):
             x=1
         ),
         template='plotly_white',
+        plot_bgcolor=COLOR_BACKGROUND,
+        paper_bgcolor='white',
+        font=dict(
+            family="Courier New, monospace",
+            color=COLOR_SECONDARY
+        ),
         hovermode='x unified'
     )
 

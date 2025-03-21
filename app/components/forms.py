@@ -170,4 +170,3 @@ def study_log_form():
             return True
 
         return False
-    

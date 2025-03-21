@@ -5,7 +5,8 @@ hideTopBar = true
 enableStaticServing = true
 
 [theme]
-primaryColor = "#4c78a8"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#262730"
+primaryColor = "#67597A"       # Deep purple for primary actions
+backgroundColor = "#F4F7BE"    # Light cream for background
+secondaryBackgroundColor = "#E5F77D"  # Bright lime for secondary backgrounds
+textColor = "#757761"          # Olive gray for text
+font = "serif"                 # Using serif font family
