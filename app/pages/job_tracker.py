@@ -5,8 +5,8 @@ from datetime import datetime
 import os
 from pathlib import Path
 
-from app.utils.database import get_all_jobs, update_job, get_job
-from app.utils.file_handler import get_file_download_link, save_resume, save_cover_letter
+from app.utils.database import get_all_jobs, update_job, get_job, delete_job
+from app.utils.file_handler import get_file_download_link, save_resume, save_cover_letter, delete_file
 from app.components.forms import job_application_form
 
 
@@ -55,8 +55,8 @@ def show():
         # Show the job application form
         job_added = job_application_form()
         if job_added:
-            # Reset the form by rerunning the app
-            st.rerun()  # Changed from experimental_rerun() to rerun()
+            # Display success message (don't use rerun here)
+            st.success("Job application added successfully!")
 
     with tab2:
         st.header("View and Update Job Applications")
@@ -191,7 +191,7 @@ def update_job_details(job):
             )
 
             st.success("Job application updated!")
-            st.rerun()  # Changed from experimental_rerun() to rerun()
+            # Don't use rerun here
 
     # Delete button with confirmation
     with col2:
@@ -205,16 +205,11 @@ def update_job_details(job):
 
         with col1:
             if st.button("Yes, Delete", key=f"confirm_yes_{job_id}", type="primary"):
-                # Import the delete_job function from database
-                from app.utils.database import delete_job
-
                 # Delete associated files if they exist
                 if job['resume_path']:
-                    from app.utils.file_handler import delete_file
                     delete_file(job['resume_path'])
 
                 if job['cover_letter_path']:
-                    from app.utils.file_handler import delete_file
                     delete_file(job['cover_letter_path'])
 
                 # Delete the job from the database
@@ -222,9 +217,10 @@ def update_job_details(job):
 
                 st.success("Job application deleted successfully!")
                 st.session_state[f"confirm_delete_{job_id}"] = False
-                st.rerun()  # Changed from experimental_rerun() to rerun()
+                # Don't use rerun here - just update the session state
+                # The user can manually refresh the page if needed
 
         with col2:
             if st.button("Cancel", key=f"confirm_no_{job_id}", type="secondary"):
                 st.session_state[f"confirm_delete_{job_id}"] = False
-                st.rerun()  # Changed from experimental_rerun() to rerun()
+                # Don't use rerun here

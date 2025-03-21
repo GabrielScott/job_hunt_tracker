@@ -231,6 +231,6 @@ def show_app_settings():
                 json.dump(current_config, f, indent=4)
 
             st.success("Settings saved successfully!")
-            st.rerun()  # Changed from experimental_rerun() to rerun()
+            # Don't use rerun here, just show the success message
         except Exception as e:
             st.error(f"Error saving settings: {str(e)}")
