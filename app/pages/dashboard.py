@@ -98,12 +98,22 @@ def show():
 
     with tab1:
         if not jobs_df.empty:
-            recent_jobs = jobs_df.sort_values('date_applied', ascending=False).head(5)
+            # Make sure we have unique job entries by company and position
+            # Since job_id is not visible to users, we'll use company+position as a proxy for uniqueness
+            # This will help eliminate any visual duplicates
+            jobs_df['company_position'] = jobs_df['company'] + ' - ' + jobs_df['position']
+            recent_jobs = jobs_df.drop_duplicates(subset=['company_position']).sort_values('date_applied',
+                                                                                           ascending=False).head(5)
+
             for _, job in recent_jobs.iterrows():
                 st.markdown(f"**{job['company']} - {job['position']}** ({job['status']})")
                 st.markdown(f"Applied on: {job['date_applied'].strftime('%Y-%m-%d')}")
                 if job['notes']:
-                    st.markdown(f"Notes: {job['notes']}")
+                    # Truncate notes if they are too long for the dashboard view
+                    display_notes = job['notes']
+                    if len(display_notes) > 100:  # Limit to 100 characters
+                        display_notes = display_notes[:97] + "..."
+                    st.markdown(f"Notes: {display_notes}")
                 st.markdown("---")
         else:
             st.write("No recent job applications.")

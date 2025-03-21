@@ -40,6 +40,52 @@ st.markdown("""
         background-color: #4c78a8;
         color: white;
     }
+    /* Custom sidebar styling */
+    .css-1d391kg {
+        padding-top: 1rem;
+    }
+    .sidebar-nav-button {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        margin: 0.2rem 0;
+        border-radius: 0.3rem;
+        background-color: transparent;
+        border: none;
+        color: #262730;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .sidebar-nav-button:hover {
+        background-color: rgba(151, 166, 195, 0.15);
+    }
+    .sidebar-nav-button-active {
+        background-color: #4c78a8;
+        color: white;
+    }
+    .sidebar-nav-button-active:hover {
+        background-color: #3a6691;
+    }
+        /* Hide default Streamlit navigation */
+    header {display: none !important;}
+    .stApp > header {display: none !important;}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* Hide any navigation tabs that might be auto-generated */
+    [data-testid="stSidebarNav"], 
+    [data-testid="collapsedControl"],
+    [data-baseweb="tab-list"],
+    [data-baseweb="tab"] {
+        display: none !important;
+    }
+    
+    /* Ensure the sidebar is the only navigation */
+    section[data-testid="stSidebar"] {
+        display: block !important;
+        visibility: visible !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -48,19 +94,35 @@ st.markdown("""
 def main():
     # Sidebar navigation
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio(
-        "Go to",
-        ["Dashboard", "Job Applications", "Study Tracker", "Settings"]
-    )
+
+    # Store the current page in session state
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "Dashboard"
+
+    # Create styled navigation buttons
+    for page_name in ["Dashboard", "Job Applications", "Study Tracker", "Settings"]:
+        # Determine if this button is active
+        is_active = st.session_state.current_page == page_name
+        active_class = "sidebar-nav-button-active" if is_active else ""
+
+        # Create the button with the appropriate styling
+        if st.sidebar.button(
+                page_name,
+                key=f"nav_{page_name}",
+                use_container_width=True,
+                type="primary" if is_active else "secondary"
+        ):
+            st.session_state.current_page = page_name
+            # No need for st.experimental_rerun() in newer Streamlit versions
 
     # Display page based on selection
-    if page == "Dashboard":
+    if st.session_state.current_page == "Dashboard":
         dashboard.show()
-    elif page == "Job Applications":
+    elif st.session_state.current_page == "Job Applications":
         job_tracker.show()
-    elif page == "Study Tracker":
+    elif st.session_state.current_page == "Study Tracker":
         study_tracker.show()
-    elif page == "Settings":
+    elif st.session_state.current_page == "Settings":
         settings.show()
 
     # Footer

@@ -155,36 +155,76 @@ def update_job_details(job):
         st.write("**Status History:**")
         st.info(job['notes'].split("STATUS HISTORY")[1])
 
+    # Add columns for the buttons
+    col1, col2 = st.columns(2)
+
     # Save button for updates
-    if st.button("Save Changes", key=f"save_{job_id}"):
-        # Process file uploads if any
-        resume_path = job['resume_path']
-        cover_letter_path = job['cover_letter_path']
+    with col1:
+        if st.button("Save Changes", key=f"save_{job_id}"):
+            # Process file uploads if any
+            resume_path = job['resume_path']
+            cover_letter_path = job['cover_letter_path']
 
-        if new_resume:
-            resume_path = save_resume(new_resume, job['company'], job['position'])
+            if new_resume:
+                resume_path = save_resume(new_resume, job['company'], job['position'])
 
-        if new_cover_letter:
-            cover_letter_path = save_cover_letter(new_cover_letter, job['company'], job['position'])
+            if new_cover_letter:
+                cover_letter_path = save_cover_letter(new_cover_letter, job['company'], job['position'])
 
-        # Add status history to notes if status has changed
-        if new_status != job['status']:
-            status_history = job['notes']
-            if "STATUS HISTORY" not in status_history:
-                status_history += "\n\nSTATUS HISTORY\n"
+            # Add status history to notes if status has changed
+            if new_status != job['status']:
+                status_history = job['notes']
+                if "STATUS HISTORY" not in status_history:
+                    status_history += "\n\nSTATUS HISTORY\n"
 
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-            status_history += f"\n{timestamp}: Changed from '{job['status']}' to '{new_status}'"
-            new_notes = status_history
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                status_history += f"\n{timestamp}: Changed from '{job['status']}' to '{new_status}'"
+                new_notes = status_history
 
-        # Update database
-        update_job(
-            job_id=job_id,
-            status=new_status,
-            notes=new_notes,
-            resume_path=resume_path,
-            cover_letter_path=cover_letter_path
-        )
+            # Update database
+            update_job(
+                job_id=job_id,
+                status=new_status,
+                notes=new_notes,
+                resume_path=resume_path,
+                cover_letter_path=cover_letter_path
+            )
 
-        st.success("Job application updated!")
-        st.experimental_rerun()
+            st.success("Job application updated!")
+            st.experimental_rerun()
+
+    # Delete button with confirmation
+    with col2:
+        if st.button("Delete Application", key=f"delete_{job_id}", type="secondary"):
+            st.session_state[f"confirm_delete_{job_id}"] = True
+
+    # Show confirmation dialog if delete button was clicked
+    if st.session_state.get(f"confirm_delete_{job_id}", False):
+        st.warning("Are you sure you want to delete this job application? This action cannot be undone.")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("Yes, Delete", key=f"confirm_yes_{job_id}", type="primary"):
+                # Import the delete_job function from database
+                from app.utils.database import delete_job
+
+                # Delete associated files if they exist
+                if job['resume_path']:
+                    from app.utils.file_handler import delete_file
+                    delete_file(job['resume_path'])
+
+                if job['cover_letter_path']:
+                    from app.utils.file_handler import delete_file
+                    delete_file(job['cover_letter_path'])
+
+                # Delete the job from the database
+                delete_job(job_id)
+
+                st.success("Job application deleted successfully!")
+                st.session_state[f"confirm_delete_{job_id}"] = False
+                st.experimental_rerun()
+
+        with col2:
+            if st.button("Cancel", key=f"confirm_no_{job_id}", type="secondary"):
+                st.session_state[f"confirm_delete_{job_id}"] = False
+                st.experimental_rerun()
