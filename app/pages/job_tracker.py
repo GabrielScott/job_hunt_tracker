@@ -46,7 +46,8 @@ status_options = config.get('job_tracking', {}).get('statuses', [
 
 def show():
     """Display the job applications tracker page."""
-    st.title("Job Applications Tracker")
+    # Custom styling for consistent headers
+    st.markdown("<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Job Applications Tracker</h2>", unsafe_allow_html=True)
 
     # Create tabs for adding new applications and viewing/updating existing ones
     tab1, tab2 = st.tabs(["Add New Application", "View/Update Applications"])
@@ -59,7 +60,7 @@ def show():
             st.success("Job application added successfully!")
 
     with tab2:
-        st.header("View and Update Job Applications")
+        st.markdown("<h3 style='color: #67597A;'>View and Update Job Applications</h3>", unsafe_allow_html=True)
 
         # Get job data from database
         jobs_df = get_all_jobs()
@@ -110,10 +111,11 @@ def update_job_details(job):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.write(f"**Company:** {job['company']}")
-        st.write(f"**Position:** {job['position']}")
-        st.write(f"**Date Applied:** {job['date_applied']}")
-        st.write(f"**Last Updated:** {job['last_updated']}")
+        # Apply custom styling to make text purple instead of white
+        st.markdown(f"<div style='color: #67597A; font-weight: bold;'>Company:</div> <div style='color: #67597A;'>{job['company']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color: #67597A; font-weight: bold;'>Position:</div> <div style='color: #67597A;'>{job['position']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color: #67597A; font-weight: bold;'>Date Applied:</div> <div style='color: #67597A;'>{job['date_applied']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color: #67597A; font-weight: bold;'>Last Updated:</div> <div style='color: #67597A;'>{job['last_updated']}</div>", unsafe_allow_html=True)
 
         # Allow updating status
         new_status = st.selectbox(
@@ -128,23 +130,23 @@ def update_job_details(job):
 
     with col2:
         # Display resume and cover letter download links
-        st.write("**Resume:**")
+        st.markdown("<div style='color: #67597A; font-weight: bold;'>Resume:</div>", unsafe_allow_html=True)
         if job['resume_path']:
             resume_file_name = os.path.basename(job['resume_path'])
             st.markdown(get_file_download_link(job['resume_path'], resume_file_name), unsafe_allow_html=True)
         else:
-            st.write("No resume uploaded")
+            st.markdown("<div style='color: #67597A;'>No resume uploaded</div>", unsafe_allow_html=True)
 
         # Upload new resume
         new_resume = st.file_uploader("Upload New Resume", type=["pdf", "docx", "doc"], key=f"new_resume_{job_id}")
 
-        st.write("**Cover Letter:**")
+        st.markdown("<div style='color: #67597A; font-weight: bold;'>Cover Letter:</div>", unsafe_allow_html=True)
         if job['cover_letter_path']:
             cover_letter_file_name = os.path.basename(job['cover_letter_path'])
             st.markdown(get_file_download_link(job['cover_letter_path'], cover_letter_file_name),
                         unsafe_allow_html=True)
         else:
-            st.write("No cover letter uploaded")
+            st.markdown("<div style='color: #67597A;'>No cover letter uploaded</div>", unsafe_allow_html=True)
 
         # Upload new cover letter
         new_cover_letter = st.file_uploader("Upload New Cover Letter", type=["pdf", "docx", "doc"],
@@ -152,7 +154,7 @@ def update_job_details(job):
 
     # Status history timeline
     if job['notes'] and "STATUS HISTORY" in job['notes']:
-        st.write("**Status History:**")
+        st.markdown("<div style='color: #67597A; font-weight: bold; margin-top: 15px;'>Status History:</div>", unsafe_allow_html=True)
         st.info(job['notes'].split("STATUS HISTORY")[1])
 
     # Add columns for the buttons

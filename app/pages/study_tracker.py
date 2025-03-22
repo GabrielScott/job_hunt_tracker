@@ -32,7 +32,10 @@ daily_target = config.get('study_tracking', {}).get('daily_target_minutes', 70)
 
 def show():
     """Display the study tracker page."""
-    st.title("SOA Study Tracker")
+    # Custom styling for consistent headers
+    st.markdown(
+        "<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>SOA Study Tracker</h2>",
+        unsafe_allow_html=True)
 
     # Create tabs for logging study time and viewing progress
     tab1, tab2, tab3 = st.tabs(["Log Study Time", "Daily Progress", "Weekly Progress"])
@@ -52,7 +55,7 @@ def show():
             st.success("Study time logged successfully!")
 
     with tab2:
-        st.header("Daily Study Progress")
+        st.markdown("<h3 style='color: #67597A;'>Daily Study Progress</h3>", unsafe_allow_html=True)
 
         if not study_df.empty:
             # Calculate and display streak
@@ -78,10 +81,28 @@ def show():
 
             # Display progress against daily target
             fig = plot_study_progress(study_df, daily_target)
+
+            # Chart container with transparent background and lime border
+            st.markdown(
+                """
+                <style>
+                .chart-container {
+                    border: 2px solid #E5F77D;
+                    padding: 10px;
+                    margin-bottom: 20px;
+                    background-color: rgba(0, 0, 0, 0.05);
+                }
+                </style>
+                <div class="chart-container">
+                """,
+                unsafe_allow_html=True
+            )
             st.plotly_chart(fig, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
             # Study log table
-            st.subheader("Study Log")
+            st.markdown("<h4 style='color: #67597A;'>Study Log</h4>", unsafe_allow_html=True)
+
             log_view = study_df.sort_values('date', ascending=False).copy()
             log_view['date'] = log_view['date'].dt.date
             log_view['hours'] = log_view['duration'] // 60
@@ -98,15 +119,19 @@ def show():
             st.info("No study data recorded yet. Use the 'Log Study Time' tab to get started!")
 
     with tab3:
-        st.header("Weekly Study Progress")
+        st.markdown("<h3 style='color: #67597A;'>Weekly Study Progress</h3>", unsafe_allow_html=True)
 
         if not study_df.empty:
             # Weekly progress chart
             fig = plot_weekly_study_progress(study_df, daily_target)
+
+            # Chart container with transparent background and lime border
+            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
             st.plotly_chart(fig, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
             # Weekly summary statistics
-            st.subheader("Weekly Summary")
+            st.markdown("<h4 style='color: #67597A;'>Weekly Summary</h4>", unsafe_allow_html=True)
 
             # Create a weekly summary dataframe
             weekly_df = study_df.copy()
@@ -138,7 +163,7 @@ def show():
             st.dataframe(display_weekly, use_container_width=True)
 
             # Display study consistency information
-            st.subheader("Study Consistency")
+            st.markdown("<h4 style='color: #67597A;'>Study Consistency</h4>", unsafe_allow_html=True)
 
             # Get data for the last 4 weeks
             today = datetime.now().date()

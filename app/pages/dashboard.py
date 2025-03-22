@@ -48,13 +48,36 @@ def show():
         unsafe_allow_html=True
     )
 
-    # Applications over time chart - with lime green header
-    st.markdown("<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Application Trends</h3>",
-                unsafe_allow_html=True)
+    # Applications over time chart - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Application Trends</h3>",
+        unsafe_allow_html=True)
 
     if not jobs_df.empty:
+        # Chart container with transparent background and lime border
+        st.markdown(
+            """
+            <style>
+            .chart-container {
+                border: 2px solid #E5F77D;
+                padding: 10px;
+                margin-bottom: 20px;
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+            </style>
+            <div class="chart-container">
+            """,
+            unsafe_allow_html=True
+        )
         fig = plot_applications_over_time(jobs_df)
+        # Update chart layout for dark/transparent background
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(color="#E5F77D")
+        )
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.markdown(
             """
@@ -72,14 +95,28 @@ def show():
             unsafe_allow_html=True
         )
 
-    # Status distribution chart - with lime green header
+    # Status distribution chart - lime green header
     st.markdown(
-        "<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Application Status Distribution</h3>",
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Application Status Distribution</h3>",
         unsafe_allow_html=True)
 
     if not jobs_df.empty and len(jobs_df['status'].unique()) > 1:
+        # Chart container with transparent background and lime border
+        st.markdown(
+            """
+            <div class="chart-container">
+            """,
+            unsafe_allow_html=True
+        )
         fig = plot_status_distribution(jobs_df)
+        # Update chart layout for dark/transparent background
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(color="#E5F77D")
+        )
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.markdown(
             """
@@ -97,13 +134,28 @@ def show():
             unsafe_allow_html=True
         )
 
-    # Study progress chart - with lime green header
-    st.markdown("<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Study Progress</h3>",
-                unsafe_allow_html=True)
+    # Study progress chart - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Study Progress</h3>",
+        unsafe_allow_html=True)
 
     if not study_df.empty:
+        # Chart container with transparent background and lime border
+        st.markdown(
+            """
+            <div class="chart-container">
+            """,
+            unsafe_allow_html=True
+        )
         fig = plot_study_progress(study_df)
+        # Update chart layout for dark/transparent background
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(color="#E5F77D")
+        )
         st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.markdown(
             """
@@ -121,9 +173,10 @@ def show():
             unsafe_allow_html=True
         )
 
-    # Recent activities section with custom styling - with lime green header
-    st.markdown("<h3 style='color: #E5F77D; background-color: #67597A; padding: 10px;'>Recent Activities</h3>",
-                unsafe_allow_html=True)
+    # Recent activities section - lime green header
+    st.markdown(
+        "<h3 style='color: #E5F77D; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Recent Activities</h3>",
+        unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 

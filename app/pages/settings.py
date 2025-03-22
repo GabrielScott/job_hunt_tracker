@@ -30,7 +30,8 @@ config = get_config()
 
 def show():
     """Display the settings page."""
-    st.title("Settings")
+    # Custom styling for consistent headers
+    st.markdown("<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Settings</h2>", unsafe_allow_html=True)
 
     # App information
     st.sidebar.markdown("---")
@@ -53,7 +54,7 @@ def show():
 
 def show_export_options():
     """Display options for exporting data."""
-    st.header("Export Data")
+    st.markdown("<h3 style='color: #67597A;'>Export Data</h3>", unsafe_allow_html=True)
 
     export_format = st.radio("Export Format", ["CSV", "Excel"])
 
@@ -126,7 +127,7 @@ def show_export_options():
 
 def show_reset_options():
     """Display options for resetting data."""
-    st.header("Reset Data")
+    st.markdown("<h3 style='color: #67597A;'>Reset Data</h3>", unsafe_allow_html=True)
     st.warning("Warning: This will delete your data. This action cannot be undone!")
 
     reset_col1, reset_col2 = st.columns(2)
@@ -144,7 +145,7 @@ def show_reset_options():
                 st.success("Study log data has been reset!")
 
     # Add additional confirmation for resetting all data
-    st.subheader("Reset All Data")
+    st.markdown("<h4 style='color: #67597A;'>Reset All Data</h4>", unsafe_allow_html=True)
 
     # Create a confirmation check
     confirm_reset = st.checkbox("I understand this will delete ALL my data and cannot be undone.")
@@ -158,13 +159,13 @@ def show_reset_options():
 
 def show_app_settings():
     """Display application settings."""
-    st.header("Application Settings")
+    st.markdown("<h3 style='color: #67597A;'>Application Settings</h3>", unsafe_allow_html=True)
 
     # Load current configuration
     current_config = get_config()
 
     # Study settings
-    st.subheader("Study Settings")
+    st.markdown("<h4 style='color: #67597A;'>Study Settings</h4>", unsafe_allow_html=True)
 
     daily_target = st.number_input(
         "Daily Study Target (minutes)",
@@ -183,7 +184,7 @@ def show_app_settings():
     )
 
     # Job application settings
-    st.subheader("Job Application Settings")
+    st.markdown("<h4 style='color: #67597A;'>Job Application Settings</h4>", unsafe_allow_html=True)
 
     weekly_goal = st.number_input(
         "Weekly Application Goal",
