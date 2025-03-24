@@ -47,16 +47,16 @@ status_options = config.get('job_tracking', {}).get('statuses', [
 def show():
     """Display the job applications tracker page."""
     # Custom styling for consistent headers
-    st.markdown("<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Job Applications Tracker</h2>", unsafe_allow_html=True)
+    #st.markdown("<h2 class='header-text'>Job Applications Tracker</h2>", unsafe_allow_html=True)
 
     # Add custom CSS for form labels
-    st.markdown("""
-    <style>
-    .stSelectbox label, .stTextArea label, .stFileUploader label, p {
-        color: #67597A !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+  #  st.markdown("""
+  #  <style>
+  #  .stSelectbox label, .stTextArea label, .stFileUploader label, p {
+  #      color: #67597A !important;
+  #  }
+  #  </style>
+  #  """, unsafe_allow_html=True)
 
     # Create tabs for adding new applications and viewing/updating existing ones
     tab1, tab2 = st.tabs(["Add New Application", "View/Update Applications"])

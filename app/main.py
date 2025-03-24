@@ -40,8 +40,8 @@ st.markdown("""
 
     /* Button styling - square edges */
     .stButton button {
-        background-color: #67597A;
-        color: #F4F7BE;
+        background-color: #F4F7BE;
+        color: #67597A;
         border: none;
         border-radius: 0 !important;
         transition: all 0.3s;
@@ -71,29 +71,20 @@ st.markdown("""
         border-radius: 0 !important;
     }
 
-    /* Tab styling - square edges */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0;
-        background-color: #F4F7BE;
-        border: 2px solid #E5F77D;
-    }
 
-    .stTabs [data-baseweb="tab"] {
-        height: 4rem;
-        white-space: pre-wrap;
-        background-color: #F4F7BE;
-        border-radius: 0 !important;
-        margin-right: 0;
-        border-right: 2px solid #E5F77D;
-        color: #67597A;
-        font-weight: bold;
-    }
+    /* Ensure tab text is always readable */
 
-    .stTabs [aria-selected="true"] {
-        background-color: #67597A;
-        color: #F4F7BE;
+    .stTabs [data-baseweb="tab-list"] [data-baseweb="tab"][aria-selected="true"] {
+    background-color: #67597A !important;
+    color: #F4F7BE !important;
     }
-
+    
+    /* Fix for sidebar navigation buttons */
+    .sidebar-nav-button-active {
+        background-color: #E9724C !important;
+        color: white !important;
+        border-left-color: #F4F7BE !important;
+    }
     /* Metrics styling */
     div[data-testid="stMetricValue"] {
         font-size: 2rem;
@@ -104,7 +95,21 @@ st.markdown("""
     div[data-testid="stMetricLabel"] {
         color: #757761;
     }
-
+    /* Common text styles */
+    .header-text {
+        color: #67597A;
+        border-bottom: 2px solid #E5F77D;
+        padding-bottom: 5px;
+    }
+    
+    .label-text {
+        color: #67597A; 
+        font-weight: bold;
+    }
+    
+    .content-text {
+        color: #67597A;
+    }    
     /* Expander styling - square edges */
     .stExpander {
         border: 2px solid #E5F77D !important;

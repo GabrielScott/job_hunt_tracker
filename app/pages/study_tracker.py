@@ -88,7 +88,7 @@ def show():
                 <style>
                 .chart-container {
                     border: 2px solid #E5F77D;
-                    padding: 10px;
+                    padding: 20px;
                     margin-bottom: 20px;
                     background-color: rgba(0, 0, 0, 0.05);
                 }
