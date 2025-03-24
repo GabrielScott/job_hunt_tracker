@@ -49,6 +49,15 @@ def show():
     # Custom styling for consistent headers
     st.markdown("<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Job Applications Tracker</h2>", unsafe_allow_html=True)
 
+    # Add custom CSS for form labels
+    st.markdown("""
+    <style>
+    .stSelectbox label, .stTextArea label, .stFileUploader label, p {
+        color: #67597A !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     # Create tabs for adding new applications and viewing/updating existing ones
     tab1, tab2 = st.tabs(["Add New Application", "View/Update Applications"])
 
@@ -118,15 +127,23 @@ def update_job_details(job):
         st.markdown(f"<div style='color: #67597A; font-weight: bold;'>Last Updated:</div> <div style='color: #67597A;'>{job['last_updated']}</div>", unsafe_allow_html=True)
 
         # Allow updating status
+        st.markdown("<div style='color: #67597A; font-weight: bold; margin-top: 15px;'>Update Status:</div>", unsafe_allow_html=True)
         new_status = st.selectbox(
-            "Update Status",
+            " ",  # Using a space for the label to hide it since we're using custom label above
             status_options,
             index=status_options.index(job['status']) if job['status'] in status_options else 0,
-            key=f"status_{job_id}"
+            key=f"status_{job_id}",
+            label_visibility="collapsed"
         )
 
         # Update notes
-        new_notes = st.text_area("Update Notes", value=job['notes'], key=f"notes_{job_id}")
+        st.markdown("<div style='color: #67597A; font-weight: bold; margin-top: 15px;'>Update Notes:</div>", unsafe_allow_html=True)
+        new_notes = st.text_area(
+            " ",  # Using a space for the label to hide it
+            value=job['notes'],
+            key=f"notes_{job_id}",
+            label_visibility="collapsed"
+        )
 
     with col2:
         # Display resume and cover letter download links
@@ -138,9 +155,15 @@ def update_job_details(job):
             st.markdown("<div style='color: #67597A;'>No resume uploaded</div>", unsafe_allow_html=True)
 
         # Upload new resume
-        new_resume = st.file_uploader("Upload New Resume", type=["pdf", "docx", "doc"], key=f"new_resume_{job_id}")
+        st.markdown("<div style='color: #67597A; font-weight: bold; margin-top: 15px;'>Upload New Resume:</div>", unsafe_allow_html=True)
+        new_resume = st.file_uploader(
+            " ",  # Using a space for the label to hide it
+            type=["pdf", "docx", "doc"],
+            key=f"new_resume_{job_id}",
+            label_visibility="collapsed"
+        )
 
-        st.markdown("<div style='color: #67597A; font-weight: bold;'>Cover Letter:</div>", unsafe_allow_html=True)
+        st.markdown("<div style='color: #67597A; font-weight: bold; margin-top: 15px;'>Cover Letter:</div>", unsafe_allow_html=True)
         if job['cover_letter_path']:
             cover_letter_file_name = os.path.basename(job['cover_letter_path'])
             st.markdown(get_file_download_link(job['cover_letter_path'], cover_letter_file_name),
@@ -149,8 +172,13 @@ def update_job_details(job):
             st.markdown("<div style='color: #67597A;'>No cover letter uploaded</div>", unsafe_allow_html=True)
 
         # Upload new cover letter
-        new_cover_letter = st.file_uploader("Upload New Cover Letter", type=["pdf", "docx", "doc"],
-                                            key=f"new_cover_{job_id}")
+        st.markdown("<div style='color: #67597A; font-weight: bold; margin-top: 15px;'>Upload New Cover Letter:</div>", unsafe_allow_html=True)
+        new_cover_letter = st.file_uploader(
+            " ",  # Using a space for the label to hide it
+            type=["pdf", "docx", "doc"],
+            key=f"new_cover_{job_id}",
+            label_visibility="collapsed"
+        )
 
     # Status history timeline
     if job['notes'] and "STATUS HISTORY" in job['notes']:
