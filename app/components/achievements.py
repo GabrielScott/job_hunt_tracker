@@ -3,6 +3,8 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import sqlite3
+import time
 
 from app.utils.achievements import (
     get_all_achievements,
@@ -176,12 +178,29 @@ def display_study_sections():
 
                 # Option to mark as incomplete
                 if st.button("Mark as Incomplete", key=f"incomplete_{section['id']}"):
-                    mark_section_incomplete(section['id'])
-                    st.success(f"'{section['name']}' marked as incomplete.")
-                    st.rerun()
+                    try:
+                        mark_section_incomplete(section['id'])
+                        st.success(f"'{section['name']}' marked as incomplete.")
+                        st.experimental_rerun()
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
             else:
                 # Option to mark as completed
                 if st.button("Mark as Completed", key=f"complete_{section['id']}"):
-                    mark_section_completed(section['id'])
-                    st.success(f"'{section['name']}' marked as completed!")
-                    st.rerun()
+                    try:
+                        # Use a key in session state to prevent multiple clicks
+                        if f"processing_{section['id']}" not in st.session_state:
+                            st.session_state[f"processing_{section['id']}"] = True
+                            success = mark_section_completed(section['id'])
+                            if success:
+                                st.success(f"'{section['name']}' marked as completed!")
+                            else:
+                                st.error("Failed to mark as completed. Please try again.")
+                            # Clear the processing flag after a short delay
+                            import time
+                            time.sleep(0.1)
+                            st.session_state.pop(f"processing_{section['id']}", None)
+                            st.experimental_rerun()
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
+                        st.session_state.pop(f"processing_{section['id']}", None)

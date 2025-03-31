@@ -160,23 +160,48 @@ def get_unlocked_achievements():
 
 def unlock_achievement(achievement_id):
     """Mark an achievement as unlocked."""
-    conn = get_db_connection()
-    c = conn.cursor()
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
 
-    # Check if already unlocked
-    c.execute("SELECT achievement_id FROM user_achievements WHERE achievement_id = ?", (achievement_id,))
-    if c.fetchone() is None:
-        # Not unlocked yet, so unlock it
-        c.execute(
-            "INSERT INTO user_achievements (achievement_id, date_unlocked) VALUES (?, ?)",
-            (achievement_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        )
-        conn.commit()
+        # Check if already unlocked
+        c.execute("SELECT achievement_id FROM user_achievements WHERE achievement_id = ?", (achievement_id,))
+        if c.fetchone() is None:
+            # Not unlocked yet, so unlock it
+            c.execute(
+                "INSERT INTO user_achievements (achievement_id, date_unlocked) VALUES (?, ?)",
+                (achievement_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            )
+            conn.commit()
+            conn.close()
+            return True  # Newly unlocked
+
         conn.close()
-        return True  # Newly unlocked
-
-    conn.close()
-    return False  # Already unlocked
+        return False  # Already unlocked
+    except sqlite3.OperationalError as e:
+        # Handle database locked error
+        if "database is locked" in str(e):
+            # Wait briefly and retry
+            import time
+            time.sleep(0.5)
+            try:
+                conn = get_db_connection()
+                c = conn.cursor()
+                c.execute("SELECT achievement_id FROM user_achievements WHERE achievement_id = ?", (achievement_id,))
+                if c.fetchone() is None:
+                    c.execute(
+                        "INSERT INTO user_achievements (achievement_id, date_unlocked) VALUES (?, ?)",
+                        (achievement_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    )
+                    conn.commit()
+                conn.close()
+                return True
+            except Exception as retry_error:
+                print(f"Retry failed: {retry_error}")
+                return False
+        else:
+            print(f"Database error: {e}")
+            return False
 
 
 def get_study_sections():
@@ -195,21 +220,24 @@ def get_study_sections():
 
 def mark_section_completed(section_id):
     """Mark a study section as completed."""
-    conn = get_db_connection()
-    c = conn.cursor()
+    try:
+        conn = get_db_connection()
+        c = conn.cursor()
 
-    # Mark section as completed
-    c.execute(
-        "UPDATE study_sections SET completed = 1, date_completed = ? WHERE id = ?",
-        (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), section_id)
-    )
+        # Mark section as completed
+        c.execute(
+            "UPDATE study_sections SET completed = 1, date_completed = ? WHERE id = ?",
+            (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), section_id)
+        )
+        conn.commit()
+        conn.close()
 
-    # Unlock the corresponding achievement
-    achievement_id = f"complete_{section_id}"
-    unlock_achievement(achievement_id)
-
-    conn.commit()
-    conn.close()
+        # Unlock the corresponding achievement in a separate transaction
+        achievement_id = f"complete_{section_id}"
+        return unlock_achievement(achievement_id)
+    except sqlite3.OperationalError as e:
+        print(f"Error marking section completed: {e}")
+        return False
 
 
 def mark_section_incomplete(section_id):
