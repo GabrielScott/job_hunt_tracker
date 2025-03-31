@@ -67,38 +67,18 @@ def display_achievement_card(achievement):
         text_color = "#757761"  # Olive gray
         opacity = "0.7"
 
-    # Create card HTML
-    card_html = f"""
-    <div style="
-        background-color: {bg_color};
-        border: 2px solid {border_color};
-        border-radius: 0;
-        padding: 10px;
-        margin-bottom: 10px;
-        opacity: {opacity};
-    ">
-        <div style="font-size: 2rem; text-align: center;">{achievement['icon']}</div>
-        <div style="font-weight: bold; color: {text_color}; text-align: center;">{achievement['name']}</div>
-        <div style="color: {text_color}; font-size: 0.8rem; text-align: center;">{achievement['description']}</div>
-    """
+    # Create card HTML with properly formatted strings
+    card_html = f'<div style="background-color: {bg_color}; border: 2px solid {border_color}; border-radius: 0; padding: 10px; margin-bottom: 10px; opacity: {opacity};">'
+    card_html += f'<div style="font-size: 2rem; text-align: center;">{achievement["icon"]}</div>'
+    card_html += f'<div style="font-weight: bold; color: {text_color}; text-align: center;">{achievement["name"]}</div>'
+    card_html += f'<div style="color: {text_color}; font-size: 0.8rem; text-align: center;">{achievement["description"]}</div>'
 
     # Add unlocked date if achievement is unlocked
     if achievement['unlocked']:
         unlocked_date = datetime.strptime(achievement['date_unlocked'], "%Y-%m-%d %H:%M:%S").strftime("%b %d, %Y")
-        card_html += f"""
-        <div style="
-            background-color: {border_color};
-            color: white;
-            text-align: center;
-            font-size: 0.7rem;
-            padding: 2px;
-            margin-top: 5px;
-        ">
-            Unlocked on {unlocked_date}
-        </div>
-        """
+        card_html += f'<div style="background-color: {border_color}; color: white; text-align: center; font-size: 0.7rem; padding: 2px; margin-top: 5px;">Unlocked on {unlocked_date}</div>'
 
-    card_html += "</div>"
+    card_html += '</div>'
 
     st.markdown(card_html, unsafe_allow_html=True)
 
