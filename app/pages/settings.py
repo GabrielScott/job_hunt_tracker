@@ -1,3 +1,5 @@
+# app/pages/settings.py
+
 import streamlit as st
 import pandas as pd
 import json
@@ -7,6 +9,7 @@ from io import BytesIO
 
 from app.utils.database import get_all_jobs, get_study_logs, reset_job_data, reset_study_data, reset_all_data
 from app.utils.file_handler import export_dataframe
+from app.components.section_manager import display_section_manager, display_reset_button
 
 
 # Load configuration
@@ -31,7 +34,8 @@ config = get_config()
 def show():
     """Display the settings page."""
     # Custom styling for consistent headers
-    st.markdown("<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Settings</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>Settings</h2>",
+                unsafe_allow_html=True)
 
     # App information
     st.sidebar.markdown("---")
@@ -40,7 +44,7 @@ def show():
     st.sidebar.info(f"{app_name} v{app_version}")
 
     # Create tabs for different settings sections
-    tab1, tab2, tab3 = st.tabs(["Export Data", "Reset Data", "Application Settings"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Export Data", "Reset Data", "Application Settings", "Study Sections"])
 
     with tab1:
         show_export_options()
@@ -50,6 +54,14 @@ def show():
 
     with tab3:
         show_app_settings()
+
+    with tab4:
+        # Display the study section manager
+        display_section_manager()
+
+        # Add section for quick reset to custom sections
+        st.markdown("---")
+        display_reset_button()
 
 
 def show_export_options():
@@ -183,6 +195,14 @@ def show_app_settings():
         step=1
     )
 
+    total_target_hours = st.number_input(
+        "Total Target Hours (for SOA Exam)",
+        min_value=50,
+        max_value=1000,
+        value=current_config.get('study_tracking', {}).get('total_target_hours', 300),
+        step=10
+    )
+
     # Job application settings
     st.markdown("<h4 style='color: #67597A;'>Job Application Settings</h4>", unsafe_allow_html=True)
 
@@ -216,7 +236,8 @@ def show_app_settings():
             # Update configuration
             current_config['study_tracking'] = {
                 'daily_target_minutes': daily_target,
-                'weekly_target_days': weekly_target_days
+                'weekly_target_days': weekly_target_days,
+                'total_target_hours': total_target_hours
             }
 
             current_config['job_tracking'] = {

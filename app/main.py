@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.utils.database import init_db
+from app.utils.achievements import init_achievements_db
 from app.pages import dashboard, job_tracker, study_tracker, settings
 from app.components.header import display_header
 from app.components.footer import display_footer
@@ -20,6 +21,9 @@ st.set_page_config(
 
 # Initialize database
 init_db()
+
+# Initialize achievements database
+init_achievements_db()
 
 # Custom CSS for updated styling with new colors and font, square edges
 st.markdown("""
@@ -78,7 +82,7 @@ st.markdown("""
     background-color: #67597A !important;
     color: #F4F7BE !important;
     }
-    
+
     /* Fix for sidebar navigation buttons */
     .sidebar-nav-button-active {
         background-color: #E9724C !important;
@@ -101,12 +105,12 @@ st.markdown("""
         border-bottom: 2px solid #E5F77D;
         padding-bottom: 5px;
     }
-    
+
     .label-text {
         color: #67597A; 
         font-weight: bold;
     }
-    
+
     .content-text {
         color: #67597A;
     }    
@@ -246,6 +250,21 @@ st.markdown("""
     section[data-testid="stSidebar"] {
         display: block !important;
         visibility: visible !important;
+    }
+
+    /* Achievement notification styling */
+    .achievement-notification {
+        animation: glow 1.5s infinite alternate;
+        border: 2px solid #59A14F;
+    }
+
+    @keyframes glow {
+        from {
+            box-shadow: 0 0 5px #E5F77D;
+        }
+        to {
+            box-shadow: 0 0 20px #E5F77D;
+        }
     }
 </style>
 """, unsafe_allow_html=True)

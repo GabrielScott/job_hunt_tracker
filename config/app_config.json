@@ -1,14 +1,19 @@
 {
     "app": {
         "name": "Job Hunt & Study Tracker",
-        "version": "1.0.0"
+        "version": "1.0.1"
     },
     "database": {
         "path": "data/database/job_hunt_tracker.db"
     },
     "uploads": {
         "path": "data/uploads",
-        "allowed_extensions": ["pdf", "docx", "doc", "txt"]
+        "allowed_extensions": [
+            "pdf",
+            "docx",
+            "doc",
+            "txt"
+        ]
     },
     "job_tracking": {
         "weekly_goal": 5,
@@ -26,7 +31,7 @@
         ]
     },
     "study_tracking": {
-        "daily_target_minutes": 70,
+        "daily_target_minutes": 240,
         "weekly_target_days": 5
     },
     "ui": {

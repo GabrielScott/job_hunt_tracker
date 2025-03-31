@@ -1,3 +1,5 @@
+# app/pages/study_tracker.py
+
 import streamlit as st
 import pandas as pd
 import json
@@ -8,6 +10,12 @@ from app.utils.database import get_study_logs
 from app.components.forms import study_log_form
 from app.components.charts import plot_study_progress, plot_weekly_study_progress
 from app.components.metrics import calculate_streak
+from app.utils.achievements import init_achievements_db
+from app.components.achievements import (
+    display_achievements,
+    display_study_sections,
+    check_and_display_new_achievements
+)
 
 
 # Load configuration
@@ -21,24 +29,35 @@ def get_config():
         return {
             "study_tracking": {
                 "daily_target_minutes": 70,
-                "weekly_target_days": 5
+                "weekly_target_days": 5,
+                "total_target_hours": 300  # SOA Exam P target hours
             }
         }
 
 
 config = get_config()
 daily_target = config.get('study_tracking', {}).get('daily_target_minutes', 70)
+total_target_hours = config.get('study_tracking', {}).get('total_target_hours', 300)
 
 
 def show():
     """Display the study tracker page."""
+    # Initialize achievements database
+    init_achievements_db()
+
     # Custom styling for consistent headers
     st.markdown(
         "<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>SOA Study Tracker</h2>",
         unsafe_allow_html=True)
 
-    # Create tabs for logging study time and viewing progress
-    tab1, tab2, tab3 = st.tabs(["Log Study Time", "Daily Progress", "Weekly Progress"])
+    # Create tabs for tracking different aspects
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Log Study Time",
+        "Daily Progress",
+        "Weekly Progress",
+        "Achievements",
+        "Study Manual"
+    ])
 
     # Get study data from database
     study_df = get_study_logs()
@@ -51,8 +70,12 @@ def show():
         # Show the study log form
         log_added = study_log_form()
         if log_added:
-            # Display success message (don't use rerun here)
-            st.success("Study time logged successfully!")
+            # Check for new achievements
+            new_achievements = check_and_display_new_achievements()
+
+            # Display success message
+            if not new_achievements:
+                st.success("Study time logged successfully!")
 
     with tab2:
         st.markdown("<h3 style='color: #67597A;'>Daily Study Progress</h3>", unsafe_allow_html=True)
@@ -62,13 +85,21 @@ def show():
             streak = calculate_streak(study_df)
 
             # Display metrics in columns
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4 = st.columns(4)
 
             with col1:
                 total_study_time = study_df['duration'].sum()
                 hours = total_study_time // 60
                 minutes = total_study_time % 60
                 st.metric("Total Study Time", f"{hours}h {minutes}m")
+
+                # Add progress towards 300 hours
+                total_minutes_target = total_target_hours * 60
+                progress_percent = min(100, round((total_study_time / total_minutes_target) * 100, 1))
+                st.progress(progress_percent / 100)
+                st.markdown(
+                    f"<div style='text-align: center; color: #67597A; font-size: 0.8rem;'>{progress_percent}% of {total_target_hours} hours</div>",
+                    unsafe_allow_html=True)
 
             with col2:
                 daily_average = study_df.groupby(study_df['date'].dt.date)['duration'].sum().mean()
@@ -78,6 +109,11 @@ def show():
 
             with col3:
                 st.metric("Current Streak", f"{streak} days")
+
+            with col4:
+                remaining_hours = max(0, total_target_hours - (total_study_time // 60))
+                remaining_minutes = (60 - (total_study_time % 60)) % 60
+                st.metric("Remaining Time", f"{remaining_hours}h {remaining_minutes}m")
 
             # Display progress against daily target
             fig = plot_study_progress(study_df, daily_target)
@@ -196,3 +232,11 @@ def show():
                 st.info("Not enough recent data to calculate study consistency.")
         else:
             st.info("No study data recorded yet. Use the 'Log Study Time' tab to get started!")
+
+    with tab4:
+        # Display achievements
+        display_achievements()
+
+    with tab5:
+        # Display study manual sections
+        display_study_sections()
