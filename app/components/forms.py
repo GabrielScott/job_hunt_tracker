@@ -105,6 +105,8 @@ def job_application_form():
         return False
 
 
+# Update this function in app/components/forms.py
+
 def study_log_form():
     """
     Render the form for logging study time.
@@ -112,6 +114,9 @@ def study_log_form():
     Returns:
         bool: True if study time was logged, False otherwise
     """
+    # Import the dynamic calculation function
+    from app.utils.helpers import calculate_daily_target, get_config
+
     with st.form("study_log_form"):
         st.subheader("Log Your Study Time")
 
@@ -128,12 +133,26 @@ def study_log_form():
         # Calculate total minutes
         total_minutes = hours * 60 + minutes
 
+        # Get configuration
+        config = get_config()
+
+        # Get any manual override from settings
+        manual_override = config.get('study_tracking', {}).get('daily_target_minutes', 0)
+
+        # Use either the manual override (if greater than 0) or calculate dynamically
+        if manual_override > 0:
+            daily_target = manual_override
+            target_method = "manually set"
+        else:
+            total_target_hours = config.get('study_tracking', {}).get('total_target_hours', 300)
+            daily_target = calculate_daily_target(total_target_hours)
+            target_method = "dynamically calculated"
+
         # Display target
-        daily_target = config.get('study_tracking', {}).get('daily_target_minutes', 70)
         target_hours = daily_target // 60
         target_minutes = daily_target % 60
 
-        st.info(f"Daily target: {target_hours}h {target_minutes}m")
+        st.info(f"Daily target: {target_hours}h {target_minutes}m ({target_method})")
 
         # Progress indication
         if total_minutes > 0:

@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 
 
+# Update this function in app/utils/helpers.py
+
 def get_config():
     """
     Load application configuration from the config file.
@@ -52,7 +54,9 @@ def get_config():
             },
             "study_tracking": {
                 "daily_target_minutes": 70,
-                "weekly_target_days": 5
+                "weekly_target_days": 5,
+                "total_target_hours": 300,
+                "test_date": "2024-07-16"
             },
             "ui": {
                 "theme_color": "#4C78A8",
@@ -281,3 +285,58 @@ def parse_time_to_minutes(time_str):
         return int(hours * 60)
     except ValueError:
         return 0
+
+
+# Add this to app/utils/helpers.py
+
+# Add this to app/utils/helpers.py
+
+def get_test_date():
+    """Get the test date from config or use default."""
+    config = get_config()
+    return config.get('study_tracking', {}).get('test_date', "2024-07-16")
+
+
+def calculate_daily_target(total_target_hours=300, test_date=None):
+    """
+    Calculate the daily study target in minutes based on remaining time until the test date.
+
+    Args:
+        total_target_hours: Total hours needed to prepare for the exam
+        test_date: The target test date in YYYY-MM-DD format
+
+    Returns:
+        int: Daily target in minutes
+    """
+    import datetime
+
+    # Use provided test date or get from config
+    if test_date is None:
+        test_date = get_test_date()
+
+    # Parse the test date
+    test_date = datetime.datetime.strptime(test_date, "%Y-%m-%d").date()
+
+    # Get current date
+    current_date = datetime.datetime.now().date()
+
+    # Calculate days remaining (minimum 1 day)
+    days_remaining = max(1, (test_date - current_date).days)
+
+    # Get total study data to calculate remaining hours
+    from app.utils.database import get_study_logs
+    study_df = get_study_logs()
+
+    # Calculate total minutes already studied
+    total_minutes_studied = 0
+    if not study_df.empty:
+        total_minutes_studied = study_df['duration'].sum()
+
+    # Calculate remaining minutes
+    total_minutes_target = total_target_hours * 60
+    remaining_minutes = max(0, total_minutes_target - total_minutes_studied)
+
+    # Calculate daily target (minimum 10 minutes)
+    daily_target = max(10, remaining_minutes // days_remaining)
+
+    return int(daily_target)

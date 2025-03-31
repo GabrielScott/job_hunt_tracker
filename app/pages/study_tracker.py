@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from app.utils.helpers import calculate_daily_target, get_test_date
 from app.utils.database import get_study_logs
 from app.components.forms import study_log_form
 from app.components.charts import plot_study_progress, plot_weekly_study_progress
@@ -45,10 +46,43 @@ def show():
     # Initialize achievements database
     init_achievements_db()
 
+    # Get configuration
+    config = get_config()
+    total_target_hours = config.get('study_tracking', {}).get('total_target_hours', 300)
+
+    # Calculate days until test
+    test_date_str = get_test_date()
+    test_date = datetime.strptime(test_date_str, "%Y-%m-%d").date()
+    today = datetime.now().date()
+    days_until_test = max(0, (test_date - today).days)
+
+    # Get the dynamic daily target
+    manual_override = config.get('study_tracking', {}).get('daily_target_minutes', 0)
+    if manual_override > 0:
+        daily_target = manual_override
+    else:
+        daily_target = calculate_daily_target(total_target_hours)
+
     # Custom styling for consistent headers
     st.markdown(
         "<h2 style='color: #67597A; border-bottom: 2px solid #E5F77D; padding-bottom: 5px;'>SOA Study Tracker</h2>",
         unsafe_allow_html=True)
+
+    # Display test date and countdown
+    st.markdown(
+        f"""
+        <div style="
+            background-color: #F4F7BE;
+            border-left: 4px solid #E9724C;
+            padding: 15px;
+            margin: 10px 0;
+            color: #67597A;
+        ">
+            <b>Test Date:</b> {test_date.strftime("%B %d, %Y")} ({days_until_test} days remaining)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Create tabs for tracking different aspects
     tab1, tab2, tab3, tab4, tab5 = st.tabs([

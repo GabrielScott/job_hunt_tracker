@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+from app.utils.helpers import calculate_daily_target, get_config
 
 
 # New color palette
@@ -153,17 +154,27 @@ def plot_status_distribution(jobs_df):
     return fig
 
 
-def plot_study_progress(study_df, daily_target=70):
+def plot_study_progress(study_df, daily_target=None):
     """
     Create a chart showing study progress over time.
 
     Args:
         study_df: DataFrame containing study log data
-        daily_target: Daily study target in minutes (default: 70)
+        daily_target: Daily study target in minutes (default: dynamically calculated)
 
     Returns:
         plotly.graph_objects.Figure: Study progress chart
     """
+    # If daily_target is None, calculate it dynamically
+    if daily_target is None:
+        config = get_config()
+        manual_override = config.get('study_tracking', {}).get('daily_target_minutes', 0)
+        if manual_override > 0:
+            daily_target = manual_override
+        else:
+            total_target_hours = config.get('study_tracking', {}).get('total_target_hours', 300)
+            daily_target = calculate_daily_target(total_target_hours)
+
     study_df['date'] = pd.to_datetime(study_df['date'])
     study_by_date = study_df.groupby(study_df['date'].dt.date)['duration'].sum().reset_index()
     study_by_date.columns = ['Date', 'Minutes']
@@ -218,6 +229,117 @@ def plot_study_progress(study_df, daily_target=70):
     fig.update_layout(
         title='Daily Study Progress',
         xaxis_title='Date',
+        yaxis_title='Minutes',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            font=dict(color=COLOR_TEXT)
+        ),
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0.05)',
+        font=dict(
+            family="Courier New, monospace",
+            color=COLOR_TEXT
+        ),
+        xaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
+        ),
+        yaxis=dict(
+            gridcolor=COLOR_PRIMARY,
+            zerolinecolor=COLOR_PRIMARY
+        ),
+        hovermode='x unified'
+    )
+
+    return fig
+
+
+# Also update this function
+def plot_weekly_study_progress(study_df, daily_target=None):
+    """
+    Create a chart showing weekly study progress.
+
+    Args:
+        study_df: DataFrame containing study log data
+        daily_target: Daily study target in minutes (default: dynamically calculated)
+
+    Returns:
+        plotly.graph_objects.Figure: Weekly study progress chart
+    """
+    # If daily_target is None, calculate it dynamically
+    if daily_target is None:
+        config = get_config()
+        manual_override = config.get('study_tracking', {}).get('daily_target_minutes', 0)
+        if manual_override > 0:
+            daily_target = manual_override
+        else:
+            total_target_hours = config.get('study_tracking', {}).get('total_target_hours', 300)
+            daily_target = calculate_daily_target(total_target_hours)
+
+    if study_df.empty:
+        # Return empty figure if no data
+        fig = go.Figure()
+        fig.update_layout(
+            title='Weekly Study Progress',
+            xaxis_title='Week',
+            yaxis_title='Minutes',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0.05)',
+            font=dict(
+                family="Courier New, monospace",
+                color=COLOR_TEXT
+            )
+        )
+        return fig
+
+    # Create a copy to avoid modifying the original
+    weekly_study = study_df.copy()
+
+    # Extract week and year
+    weekly_study['date'] = pd.to_datetime(weekly_study['date'])
+    weekly_study['week'] = weekly_study['date'].dt.isocalendar().week
+    weekly_study['year'] = weekly_study['date'].dt.isocalendar().year
+
+    # Group by week and calculate total duration
+    weekly_study = weekly_study.groupby(['year', 'week'])['duration'].sum().reset_index()
+
+    # Create week labels
+    weekly_study['week_label'] = weekly_study['year'].astype(str) + '-W' + weekly_study['week'].astype(str)
+
+    # Calculate weekly target
+    weekly_target = daily_target * 7
+
+    # Determine if target was met
+    weekly_study['target_met'] = weekly_study['duration'] >= weekly_target
+
+    # Create the chart with new color scheme
+    fig = go.Figure()
+
+    # Add bars for weekly study time
+    fig.add_trace(go.Bar(
+        x=weekly_study['week_label'],
+        y=weekly_study['duration'],
+        marker_color=weekly_study['target_met'].map({True: COLOR_SUCCESS, False: COLOR_PRIMARY}),
+        name='Study Minutes'
+    ))
+
+    # Add weekly target line
+    fig.add_trace(go.Scatter(
+        x=weekly_study['week_label'],
+        y=[weekly_target] * len(weekly_study),
+        mode='lines',
+        name=f'Weekly Target ({weekly_target} min)',
+        line=dict(color=COLOR_ACCENT, dash='dash')
+    ))
+
+    fig.update_layout(
+        title='Weekly Study Progress',
+        xaxis_title='Week',
         yaxis_title='Minutes',
         legend=dict(
             orientation="h",

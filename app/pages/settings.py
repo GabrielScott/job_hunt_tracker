@@ -169,6 +169,8 @@ def show_reset_options():
                 st.success("All data has been reset!")
 
 
+# Update this section in app/pages/settings.py under show_app_settings()
+
 def show_app_settings():
     """Display application settings."""
     st.markdown("<h3 style='color: #67597A;'>Application Settings</h3>", unsafe_allow_html=True)
@@ -179,12 +181,34 @@ def show_app_settings():
     # Study settings
     st.markdown("<h4 style='color: #67597A;'>Study Settings</h4>", unsafe_allow_html=True)
 
-    daily_target = st.number_input(
-        "Daily Study Target (minutes)",
+    # Add test date picker
+    default_test_date = current_config.get('study_tracking', {}).get('test_date', "2024-07-16")
+    try:
+        default_date_obj = datetime.strptime(default_test_date, "%Y-%m-%d").date()
+    except:
+        default_date_obj = datetime(2024, 7, 16).date()
+
+    test_date = st.date_input(
+        "Test Date",
+        value=default_date_obj,
+        min_value=datetime.now().date(),
+        help="The date of your exam - daily targets will be calculated based on this"
+    )
+
+    # Show note about dynamic calculation
+    st.info(
+        "Your daily study target will be calculated automatically based on the remaining time until your test date " +
+        "and your remaining study hours."
+    )
+
+    # Keep the manual override option but make it clear it's not the primary method
+    manual_daily_target = st.number_input(
+        "Manual Daily Target Override (minutes)",
         min_value=5,
         max_value=480,
         value=current_config.get('study_tracking', {}).get('daily_target_minutes', 70),
-        step=5
+        step=5,
+        help="This will override the automatic calculation if non-zero"
     )
 
     weekly_target_days = st.number_input(
@@ -202,6 +226,8 @@ def show_app_settings():
         value=current_config.get('study_tracking', {}).get('total_target_hours', 300),
         step=10
     )
+
+    # [Rest of the settings function remains unchanged]
 
     # Job application settings
     st.markdown("<h4 style='color: #67597A;'>Job Application Settings</h4>", unsafe_allow_html=True)
@@ -235,9 +261,10 @@ def show_app_settings():
 
             # Update configuration
             current_config['study_tracking'] = {
-                'daily_target_minutes': daily_target,
+                'daily_target_minutes': manual_daily_target,
                 'weekly_target_days': weekly_target_days,
-                'total_target_hours': total_target_hours
+                'total_target_hours': total_target_hours,
+                'test_date': test_date.strftime("%Y-%m-%d")
             }
 
             current_config['job_tracking'] = {
@@ -253,6 +280,5 @@ def show_app_settings():
                 json.dump(current_config, f, indent=4)
 
             st.success("Settings saved successfully!")
-            # Don't use rerun here, just show the success message
         except Exception as e:
             st.error(f"Error saving settings: {str(e)}")
