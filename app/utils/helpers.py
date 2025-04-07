@@ -10,8 +10,6 @@ import json
 from pathlib import Path
 
 
-# Update this function in app/utils/helpers.py
-
 def get_config():
     """
     Load application configuration from the config file.
@@ -286,16 +284,10 @@ def parse_time_to_minutes(time_str):
     except ValueError:
         return 0
 
-
-# Add this to app/utils/helpers.py
-
-# Add this to app/utils/helpers.py
-
 def get_test_date():
     """Get the test date from config or use default."""
     config = get_config()
     return config.get('study_tracking', {}).get('test_date', "2024-07-16")
-
 
 def calculate_daily_target(total_target_hours=300, test_date=None):
     """

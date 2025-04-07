@@ -169,8 +169,6 @@ def show_reset_options():
                 st.success("All data has been reset!")
 
 
-# Update this section in app/pages/settings.py under show_app_settings()
-
 def show_app_settings():
     """Display application settings."""
     st.markdown("<h3 style='color: #67597A;'>Application Settings</h3>", unsafe_allow_html=True)

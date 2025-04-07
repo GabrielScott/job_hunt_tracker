@@ -105,8 +105,6 @@ def job_application_form():
         return False
 
 
-# Update this function in app/components/forms.py
-
 def study_log_form():
     """
     Render the form for logging study time.
