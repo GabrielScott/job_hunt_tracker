@@ -55,6 +55,10 @@ def show():
     test_date = datetime.strptime(test_date_str, "%Y-%m-%d").date()
     today = datetime.now().date()
     days_until_test = max(0, (test_date - today).days)
+    print(f"Test date string: {test_date_str}")
+    print(f"Parsed test date: {test_date}")
+    print(f"Today's date: {today}")
+    print(f"Days difference: {(test_date - today).days}")
 
     # Get the dynamic daily target
     manual_override = config.get('study_tracking', {}).get('daily_target_minutes', 0)

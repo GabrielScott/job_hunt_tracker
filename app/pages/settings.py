@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 from io import BytesIO
+from datetime import datetime
 
 from app.utils.database import get_all_jobs, get_study_logs, reset_job_data, reset_study_data, reset_all_data
 from app.utils.file_handler import export_dataframe
@@ -180,11 +181,11 @@ def show_app_settings():
     st.markdown("<h4 style='color: #67597A;'>Study Settings</h4>", unsafe_allow_html=True)
 
     # Add test date picker
-    default_test_date = current_config.get('study_tracking', {}).get('test_date', "2024-07-16")
+    default_test_date = current_config.get('study_tracking', {}).get('test_date', "2025-07-16")
     try:
         default_date_obj = datetime.strptime(default_test_date, "%Y-%m-%d").date()
     except:
-        default_date_obj = datetime(2024, 7, 16).date()
+        default_date_obj = datetime(2025, 7, 16).date()
 
     test_date = st.date_input(
         "Test Date",
@@ -202,7 +203,7 @@ def show_app_settings():
     # Keep the manual override option but make it clear it's not the primary method
     manual_daily_target = st.number_input(
         "Manual Daily Target Override (minutes)",
-        min_value=5,
+        min_value=0,
         max_value=480,
         value=current_config.get('study_tracking', {}).get('daily_target_minutes', 70),
         step=5,

@@ -31,9 +31,10 @@
         ]
     },
     "study_tracking": {
-        "daily_target_minutes": 240,
-        "weekly_target_days": 5,
-        "total_target_hours": 300
+    "daily_target_minutes": 0,
+    "weekly_target_days": 5,
+    "total_target_hours": 300,
+    "test_date": "2025-07-16"
     },
     "ui": {
         "theme_color": "#4C78A8",

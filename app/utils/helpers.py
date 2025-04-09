@@ -54,7 +54,7 @@ def get_config():
                 "daily_target_minutes": 70,
                 "weekly_target_days": 5,
                 "total_target_hours": 300,
-                "test_date": "2024-07-16"
+                "test_date": "2025-07-16"
             },
             "ui": {
                 "theme_color": "#4C78A8",
@@ -287,7 +287,7 @@ def parse_time_to_minutes(time_str):
 def get_test_date():
     """Get the test date from config or use default."""
     config = get_config()
-    return config.get('study_tracking', {}).get('test_date', "2024-07-16")
+    return config.get('study_tracking', {}).get('test_date', "2025-07-16")
 
 def calculate_daily_target(total_target_hours=300, test_date=None):
     """
