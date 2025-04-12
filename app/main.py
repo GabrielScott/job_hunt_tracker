@@ -25,7 +25,7 @@ init_db()
 # Initialize achievements database
 init_achievements_db()
 
-# Custom CSS for updated styling with new colors and font, square edges
+# Custom CSS for updated styling with new design kind of taking influence from cursor.com
 st.markdown("""
 <style>
     /* Import Google Font - Courier Prime (serif) */
@@ -48,12 +48,45 @@ st.markdown("""
         color: #67597A;
         border: none;
         border-radius: 0 !important;
-        transition: all 0.3s;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        overflow: hidden;
     }
 
     .stButton button:hover {
         background-color: #E9724C;
         color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .stButton button:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
+
+    .stButton button:hover:after {
+        animation: ripple 1s ease-out;
+    }
+
+    @keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(20, 20);
+            opacity: 0;
+        }
     }
 
     /* Form elements - square edges */
@@ -68,6 +101,17 @@ st.markdown("""
         border-radius: 0 !important;
         border: 2px solid #E5F77D !important;
         color: #757761;
+        transition: all 0.3s ease;
+    }
+
+    .stTextInput input:focus, 
+    .stTextArea textarea:focus,
+    .stSelectbox:focus > div > div,
+    .stNumberInput input:focus,
+    .stDateInput input:focus {
+        border-color: #E9724C !important;
+        box-shadow: 0 0 0 2px rgba(233, 114, 76, 0.2);
+        transform: translateY(-1px);
     }
 
     /* Dropdown menus */
@@ -75,12 +119,19 @@ st.markdown("""
         border-radius: 0 !important;
     }
 
-
     /* Ensure tab text is always readable */
-
     .stTabs [data-baseweb="tab-list"] [data-baseweb="tab"][aria-selected="true"] {
-    background-color: #67597A !important;
-    color: #F4F7BE !important;
+        background-color: #67597A !important;
+        color: #F4F7BE !important;
+    }
+
+    .stTabs [data-baseweb="tab-list"] [data-baseweb="tab"] {
+        transition: all 0.3s ease;
+    }
+
+    .stTabs [data-baseweb="tab-list"] [data-baseweb="tab"]:hover:not([aria-selected="true"]) {
+        background-color: rgba(103, 89, 122, 0.1) !important;
+        transform: translateY(-2px);
     }
 
     /* Fix for sidebar navigation buttons */
@@ -89,16 +140,24 @@ st.markdown("""
         color: white !important;
         border-left-color: #F4F7BE !important;
     }
+
     /* Metrics styling */
     div[data-testid="stMetricValue"] {
         font-size: 2rem;
         font-weight: bold;
         color: #E9724C;
+        transition: all 0.3s ease;
+    }
+
+    div[data-testid="stMetricValue"]:hover {
+        transform: scale(1.05);
+        color: #67597A;
     }
 
     div[data-testid="stMetricLabel"] {
         color: #757761;
     }
+
     /* Common text styles */
     .header-text {
         color: #67597A;
@@ -113,12 +172,20 @@ st.markdown("""
 
     .content-text {
         color: #67597A;
-    }    
+    }
+
     /* Expander styling - square edges */
     .stExpander {
         border: 2px solid #E5F77D !important;
         border-radius: 0 !important;
         overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .stExpander:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(103, 89, 122, 0.1);
+        border-color: #E9724C !important;
     }
 
     .stExpander details {
@@ -131,6 +198,12 @@ st.markdown("""
         font-weight: bold;
         padding: 1rem;
         border-radius: 0 !important;
+        transition: all 0.3s ease;
+    }
+
+    .stExpander:hover summary {
+        background-color: #E9724C;
+        color: white;
     }
 
     /* Remove all rounded corners */
@@ -164,12 +237,13 @@ st.markdown("""
         color: #F4F7BE;
         font-size: 1rem;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
     }
 
     .sidebar-nav-button:hover {
         background-color: #E9724C;
         border-left-color: #F4F7BE;
+        transform: translateX(3px);
     }
 
     .sidebar-nav-button-active {
@@ -182,6 +256,7 @@ st.markdown("""
     .stProgress > div > div {
         background-color: #E9724C;
         border-radius: 0 !important;
+        transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .stProgress > div {
@@ -193,6 +268,11 @@ st.markdown("""
         border-radius: 0 !important;
         padding: 1rem;
         border-left: 4px solid;
+        transition: all 0.3s ease;
+    }
+
+    .stInfo:hover, .stSuccess:hover, .stWarning:hover, .stError:hover {
+        transform: translateX(3px);
     }
 
     .stInfo {
@@ -218,10 +298,99 @@ st.markdown("""
         color: #E9724C;
         border-left-color: #E9724C;
     }
+    
+    /* Improve Status History visibility */
+    .stInfo {
+        background-color: #F4F7BE;
+        color: #67597A !important;  /* Use purple for better visibility */
+        border-left-color: #E5F77D;
+        font-weight: 500;
+    }
+    
+    /* Make sure all text in info boxes is visible */
+    .stInfo * {
+        color: #67597A !important;
+    }
+    
+    
+    /* Enhanced error text fixes with higher specificity */
+    .stError,
+    .stError p, 
+    .stError div, 
+    .stError span, 
+    .stError code, 
+    .stError pre {
+        color: #67597A !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Target Streamlit's exception elements specifically */
+    [data-testid="stException"] {
+        color: #67597A !important;
+        font-weight: 500 !important;
+        background-color: rgba(244, 247, 190, 0.7) !important;
+        border-left: 4px solid #E9724C !important;
+    }
+    
+    [data-testid="stException"] * {
+        color: #67597A !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Fix any other notification elements */
+    .element-container .stNotification {
+        color: #67597A !important;
+        font-weight: 500 !important;
+    }
+    
+    .element-container .stNotification * {
+        color: #67597A !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Any other text that might need fixing */
+    .stAlert {
+        color: #67597A !important;
+    }
+    
+    .stAlert * {
+        color: #67597A !important;
+    }
+    
+    
+    /* Improve error text visibility */
+    .stError {
+        background-color: #F4F7BE;
+        color: #67597A !important;  /* Use purple instead of light color */
+        border-left-color: #E9724C;
+        font-weight: 500;
+    }
+    
+    .stError * {
+        color: #67597A !important;
+    }
+    
+    /* Strengthen text in warnings too */
+    .stWarning {
+        background-color: #F4F7BE;
+        color: #67597A !important;
+        border-left-color: #E9724C;
+        font-weight: 500;
+    }
+    
+    .stWarning * {
+        color: #67597A !important;
+    }
 
     /* Data frames */
     [data-testid="stDataFrame"] table {
         border: 2px solid #E5F77D;
+        transition: all 0.3s ease;
+    }
+
+    [data-testid="stDataFrame"] table:hover {
+        border-color: #E9724C;
+        box-shadow: 0 5px 15px rgba(103, 89, 122, 0.1);
     }
 
     [data-testid="stDataFrame"] th {
@@ -266,7 +435,64 @@ st.markdown("""
             box-shadow: 0 0 20px #E5F77D;
         }
     }
+
+    /* Cursor.com inspired loading animation */
+    @keyframes cursor-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(103, 89, 122, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(103, 89, 122, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(103, 89, 122, 0);
+        }
+    }
+
+    .stApp::before {
+        content: "";
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #67597A;
+        z-index: 9999;
+        animation: cursor-pulse 2s infinite;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stApp.running::before {
+        display: block;
+        opacity: 1;
+    }
 </style>
+
+<script>
+    // Add this JavaScript to detect when the app is loading
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length && mutation.addedNodes[0].classList) {
+                if (mutation.addedNodes[0].classList.contains('stProgress')) {
+                    document.querySelector('.stApp').classList.add('running');
+                }
+            }
+            if (mutation.removedNodes.length && mutation.removedNodes[0].classList) {
+                if (mutation.removedNodes[0].classList.contains('stProgress')) {
+                    document.querySelector('.stApp').classList.remove('running');
+                }
+            }
+        });
+    });
+
+    // Start observing once the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+</script>
 """, unsafe_allow_html=True)
 
 
