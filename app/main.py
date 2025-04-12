@@ -44,7 +44,7 @@ st.markdown("""
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: -1;
+        z-index: 0;
         
         /* Create a more visible grid pattern */
         background-image: 
@@ -477,7 +477,7 @@ st.markdown("""
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -1;
+        z-index: 0;
         pointer-events: none;
 
         /* Create a subtle grid pattern with white lines */
@@ -733,7 +733,7 @@ st.markdown("""
     });
 </script>
 """, unsafe_allow_html=True)
-# Add explicit grid background div after the CSS
+#Explicit Grid Creation
 st.markdown("""
 <div class="grid-background"></div>
 <style>
@@ -743,7 +743,7 @@ st.markdown("""
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
     background-image: 
         linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
@@ -753,6 +753,7 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # Main App
