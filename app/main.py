@@ -35,11 +35,31 @@ st.markdown("""
     * {
         font-family: 'Courier Prime', monospace !important;
     }
-
-    /* Main container styling */
+    /* More visible grid with explicit container */
+    .main .block-container::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        
+        /* Create a more visible grid pattern */
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: 0 0;
+        background-color: rgba(244, 247, 190, 0.05);
+    }
+    
+    /* Make sure there's no conflict with other containers */
     .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+        background-color: transparent !important;
     }
 
     /* Button styling - square edges */
@@ -298,7 +318,7 @@ st.markdown("""
         color: #E9724C;
         border-left-color: #E9724C;
     }
-    
+
     /* Improve Status History visibility */
     .stInfo {
         background-color: #F4F7BE;
@@ -306,13 +326,13 @@ st.markdown("""
         border-left-color: #E5F77D;
         font-weight: 500;
     }
-    
+
     /* Make sure all text in info boxes is visible */
     .stInfo * {
         color: #67597A !important;
     }
-    
-    
+
+
     /* Enhanced error text fixes with higher specificity */
     .stError,
     .stError p, 
@@ -323,7 +343,7 @@ st.markdown("""
         color: #67597A !important;
         font-weight: 500 !important;
     }
-    
+
     /* Target Streamlit's exception elements specifically */
     [data-testid="stException"] {
         color: #67597A !important;
@@ -331,54 +351,29 @@ st.markdown("""
         background-color: rgba(244, 247, 190, 0.7) !important;
         border-left: 4px solid #E9724C !important;
     }
-    
+
     [data-testid="stException"] * {
         color: #67597A !important;
         font-weight: 500 !important;
     }
-    
+
     /* Fix any other notification elements */
     .element-container .stNotification {
         color: #67597A !important;
         font-weight: 500 !important;
     }
-    
+
     .element-container .stNotification * {
         color: #67597A !important;
         font-weight: 500 !important;
     }
-    
+
     /* Any other text that might need fixing */
     .stAlert {
         color: #67597A !important;
     }
-    
+
     .stAlert * {
-        color: #67597A !important;
-    }
-    
-    
-    /* Improve error text visibility */
-    .stError {
-        background-color: #F4F7BE;
-        color: #67597A !important;  /* Use purple instead of light color */
-        border-left-color: #E9724C;
-        font-weight: 500;
-    }
-    
-    .stError * {
-        color: #67597A !important;
-    }
-    
-    /* Strengthen text in warnings too */
-    .stWarning {
-        background-color: #F4F7BE;
-        color: #67597A !important;
-        border-left-color: #E9724C;
-        font-weight: 500;
-    }
-    
-    .stWarning * {
         color: #67597A !important;
     }
 
@@ -469,6 +464,137 @@ st.markdown("""
         display: block;
         opacity: 1;
     }
+
+    /* ============================================================= */
+    /* ADD THE GRID TEXTURE CODE BELOW THIS LINE */
+    /* ============================================================= */
+
+    /* Grid background with parallax effect */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+
+        /* Create a subtle grid pattern with white lines */
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 40px 40px;
+
+        /* Add a very subtle texture */
+        background-color: rgba(244, 247, 190, 0.03);
+
+        /* Initial transform for the parallax effect */
+        transform: translateY(0);
+        will-change: transform;
+    }
+
+    /* Enhanced spatial effects */
+    .main .block-container {
+        position: relative;
+    }
+
+    /* Add depth layers to create a subtle sense of space */
+    .stTabs, .stExpander, .stMetric, .stDataFrame, .animated-header, .enhanced-footer {
+        position: relative;
+        z-index: 2;
+        backdrop-filter: blur(0px); /* Initial state */
+        transition: all 0.3s ease, backdrop-filter 0.5s ease;
+    }
+
+    /* Add subtle ambient movement to the UI */
+    @keyframes ambient-shift {
+        0% { transform: translate(0, 0); }
+        25% { transform: translate(-0.5px, 0.5px); }
+        50% { transform: translate(0.5px, 0.5px); }
+        75% { transform: translate(0.5px, -0.5px); }
+        100% { transform: translate(0, 0); }
+    }
+
+    /* Apply subtle ambient animation to certain elements */
+    .stMetric, .stExpander {
+        animation: ambient-shift 10s infinite ease-in-out;
+    }
+
+    /* Create a subtle light reflection effect on elements */
+    .stExpander::before, .animated-header::before, .stMetric::before {
+        content: "";
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        width: 50%;
+        height: 50%;
+        background: linear-gradient(
+            135deg, 
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,0.03) 50%,
+            rgba(255,255,255,0) 100%
+        );
+        transform: rotate(45deg);
+        pointer-events: none;
+        transition: all 1s ease;
+        z-index: 2;
+        opacity: 0;
+    }
+
+    /* Activate the light reflection effect on hover */
+    .stExpander:hover::before, .animated-header:hover::before, .stMetric:hover::before {
+        top: 120%;
+        left: 120%;
+        opacity: 1;
+    }
+
+    /* Create subtle noise texture */
+    .main .block-container::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.015;
+        z-index: -1;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Mouse movement tracking for subtle UI reaction */
+    .stApp {
+        --mouse-x: 0;
+        --mouse-y: 0;
+    }
+
+    /* When in dark mode, adjust the grid opacity */
+    @media (prefers-color-scheme: dark) {
+        body::before {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+    }
+
+    /* Animate elements when they enter the viewport */
+    .stExpander, .stMetric, .stDataFrame {
+        opacity: 0.95;
+        transform: translateY(5px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .stExpander.in-view, .stMetric.in-view, .stDataFrame.in-view {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Update the grid to incorporate mouse movement */
+    body::before {
+        transition: transform 0.2s ease-out;
+    }
 </style>
 
 <script>
@@ -491,8 +617,141 @@ st.markdown("""
     // Start observing once the DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         observer.observe(document.body, { childList: true, subtree: true });
+
+        // ============================================================= */
+        /* ADD THE MOUSE TRACKING SCRIPT BELOW THIS LINE */
+        /* ============================================================= */
+
+        // Track mouse movement for subtle UI reactions
+        document.addEventListener('mousemove', function(e) {
+            // Calculate mouse position relative to viewport
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+
+            // Update CSS variables for mouse position
+            document.documentElement.style.setProperty('--mouse-x', mouseX);
+            document.documentElement.style.setProperty('--mouse-y', mouseY);
+
+            // Apply subtle transforms to elements based on mouse position
+            const cards = document.querySelectorAll('.stExpander, .animated-header, .stMetric');
+            cards.forEach(card => {
+                if (card) {
+                    const rect = card.getBoundingClientRect();
+
+                    // Check if mouse is near the card
+                    const cardCenterX = rect.left + rect.width / 2;
+                    const cardCenterY = rect.top + rect.height / 2;
+
+                    // Calculate distance from mouse to card center
+                    const distX = (e.clientX - cardCenterX) / window.innerWidth;
+                    const distY = (e.clientY - cardCenterY) / window.innerHeight;
+
+                    // Only apply effect if mouse is relatively close
+                    const distance = Math.sqrt(distX * distX + distY * distY);
+                    if (distance < 0.2) {
+                        // Calculate rotation based on mouse position
+                        const rotateX = distY * 1.5; // Max 1.5 degrees
+                        const rotateY = -distX * 1.5; // Max 1.5 degrees
+
+                        // Apply subtle rotation
+                        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    } else {
+                        // Reset transform when mouse is far
+                        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                    }
+                }
+            });
+
+            // Apply subtle movement to grid based on mouse
+            const gridMovement = 5; // Max 5px movement
+            document.body.style.setProperty('--grid-x-offset', `${(mouseX - 0.5) * -gridMovement}px`);
+            document.body.style.setProperty('--grid-y-offset', `${(mouseY - 0.5) * -gridMovement}px`);
+
+            // Update the grid transform with mouse position
+            const style = document.createElement('style');
+            style.textContent = `
+                body::before { 
+                    transform: translateX(var(--grid-x-offset, 0)) translateY(calc(var(--grid-y-offset, 0) + var(--scroll-y, 0) * 0.1px)); 
+                }
+            `;
+
+            // Replace any existing mouse-tracking style
+            const existingStyle = document.getElementById('mouse-tracking-style');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+
+            style.id = 'mouse-tracking-style';
+            document.head.appendChild(style);
+        });
+
+        // Enable subtle parallax effect on scroll
+        const parallaxItems = document.querySelectorAll('.animated-header, .enhanced-footer');
+        window.addEventListener('scroll', function() {
+            // Update scroll position CSS variable
+            document.documentElement.style.setProperty('--scroll-y', window.scrollY);
+
+            parallaxItems.forEach(item => {
+                const scrollPosition = window.scrollY;
+                const scrollFactor = item.classList.contains('animated-header') ? 0.4 : 0.2;
+                const translateY = scrollPosition * scrollFactor;
+                item.style.transform = `translateY(${translateY}px)`;
+            });
+        });
+
+        // Detect when elements enter viewport for subtle entrance animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        // Observe elements that should animate on scroll
+        document.querySelectorAll('.stExpander, .stMetric, .stDataFrame').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Parallax grid scroll effect
+        window.addEventListener('scroll', function() {
+            const scrollY = window.scrollY;
+
+            // Apply the custom property in the ::before pseudo element
+            const style = document.createElement('style');
+            style.textContent = `body::before { transform: translateY(${scrollY * 0.1}px); }`;
+
+            // Replace any existing style element
+            const existingStyle = document.getElementById('parallax-style');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+
+            style.id = 'parallax-style';
+            document.head.appendChild(style);
+        });
     });
 </script>
+""", unsafe_allow_html=True)
+# Add explicit grid background div after the CSS
+st.markdown("""
+<div class="grid-background"></div>
+<style>
+.grid-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-color: rgba(244, 247, 190, 0.05);
+}
+</style>
 """, unsafe_allow_html=True)
 
 

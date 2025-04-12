@@ -113,6 +113,7 @@ def display_header():
     </style>
     """, unsafe_allow_html=True)
 
+
     # Header HTML with icons
     header_html = """
     <div class="animated-header">
