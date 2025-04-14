@@ -746,8 +746,8 @@ st.markdown("""
     z-index: 0;
     pointer-events: none;
     background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+        linear-gradient(rgba(233, 114, 76, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233, 114, 76, 0.2) 1px, transparent 1px);
     background-size: 40px 40px;
     background-color: rgba(244, 247, 190, 0.05);
 }
