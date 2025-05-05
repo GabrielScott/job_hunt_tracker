@@ -26,6 +26,9 @@ init_db()
 init_achievements_db()
 
 # Custom CSS for updated styling with new design kind of taking influence from cursor.com
+# This should replace your current CSS section in main.py
+
+# Custom CSS for updated styling with new design kind of taking influence from cursor.com
 st.markdown("""
 <style>
     /* Import Google Font - Courier Prime (serif) */
@@ -35,6 +38,7 @@ st.markdown("""
     * {
         font-family: 'Courier Prime', monospace !important;
     }
+
     /* More visible grid with explicit container */
     .main .block-container::before {
         content: "";
@@ -45,16 +49,16 @@ st.markdown("""
         height: 100%;
         pointer-events: none;
         z-index: 0;
-        
+
         /* Create a more visible grid pattern */
         background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+            linear-gradient(rgba(233, 114, 76, 0.2) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(233, 114, 76, 0.2) 1px, transparent 1px);
         background-size: 40px 40px;
         background-position: 0 0;
         background-color: rgba(244, 247, 190, 0.05);
     }
-    
+
     /* Make sure there's no conflict with other containers */
     .main .block-container {
         position: relative;
@@ -465,135 +469,86 @@ st.markdown("""
         opacity: 1;
     }
 
-    /* ============================================================= */
-    /* ADD THE GRID TEXTURE CODE BELOW THIS LINE */
-    /* ============================================================= */
-
-    /* Grid background with parallax effect */
-    body::before {
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
-
-        /* Create a subtle grid pattern with white lines */
-        background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-        background-size: 40px 40px;
-
-        /* Add a very subtle texture */
-        background-color: rgba(244, 247, 190, 0.03);
-
-        /* Initial transform for the parallax effect */
-        transform: translateY(0);
-        will-change: transform;
-    }
-
-    /* Enhanced spatial effects */
-    .main .block-container {
+    /* Base styles for interactive elements - floating tiles effect */
+    .stExpander, .stMetric, .animated-header, .enhanced-footer, .stDataFrame, .stTabs {
+        transform-style: preserve-3d;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
+        z-index: 1;
+        box-shadow: 0 4px 12px rgba(103, 89, 122, 0.1);
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        overflow: hidden;
     }
 
-    /* Add depth layers to create a subtle sense of space */
-    .stTabs, .stExpander, .stMetric, .stDataFrame, .animated-header, .enhanced-footer {
-        position: relative;
-        z-index: 2;
-        backdrop-filter: blur(0px); /* Initial state */
-        transition: all 0.3s ease, backdrop-filter 0.5s ease;
-    }
-
-    /* Add subtle ambient movement to the UI */
-    @keyframes ambient-shift {
-        0% { transform: translate(0, 0); }
-        25% { transform: translate(-0.5px, 0.5px); }
-        50% { transform: translate(0.5px, 0.5px); }
-        75% { transform: translate(0.5px, -0.5px); }
-        100% { transform: translate(0, 0); }
-    }
-
-    /* Apply subtle ambient animation to certain elements */
-    .stMetric, .stExpander {
-        animation: ambient-shift 10s infinite ease-in-out;
-    }
-
-    /* Create a subtle light reflection effect on elements */
-    .stExpander::before, .animated-header::before, .stMetric::before {
+    /* Add subtle shadow depth */
+    .stExpander::after, 
+    .stMetric::after, 
+    .animated-header::after,
+    .enhanced-footer::after,
+    .stDataFrame::after,
+    .stTabs::after {
         content: "";
         position: absolute;
-        top: -100%;
-        left: -100%;
-        width: 50%;
-        height: 50%;
-        background: linear-gradient(
-            135deg, 
-            rgba(255,255,255,0) 0%,
-            rgba(255,255,255,0.03) 50%,
-            rgba(255,255,255,0) 100%
-        );
-        transform: rotate(45deg);
-        pointer-events: none;
-        transition: all 1s ease;
-        z-index: 2;
-        opacity: 0;
-    }
-
-    /* Activate the light reflection effect on hover */
-    .stExpander:hover::before, .animated-header:hover::before, .stMetric:hover::before {
-        top: 120%;
-        left: 120%;
-        opacity: 1;
-    }
-
-    /* Create subtle noise texture */
-    .main .block-container::after {
-        content: "";
-        position: fixed;
-        top: 0;
+        bottom: 0;
         left: 0;
         width: 100%;
         height: 100%;
         pointer-events: none;
-        opacity: 0.015;
+        box-shadow: inset 0 0 0px rgba(103, 89, 122, 0);
+        transition: box-shadow 0.3s ease;
         z-index: -1;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
-    /* Mouse movement tracking for subtle UI reaction */
-    .stApp {
-        --mouse-x: 0;
-        --mouse-y: 0;
+    /* Hover state for elements */
+    .stExpander:hover::after, 
+    .stMetric:hover::after, 
+    .animated-header:hover::after,
+    .enhanced-footer:hover::after,
+    .stDataFrame:hover::after,
+    .stTabs:hover::after {
+        box-shadow: inset 0 0 20px rgba(103, 89, 122, 0.1);
     }
 
-    /* When in dark mode, adjust the grid opacity */
-    @media (prefers-color-scheme: dark) {
-        body::before {
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-color: rgba(0, 0, 0, 0.02);
+    /* Keyframes for ambient motion */
+    @keyframes float-subtle {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(2px, 1px) rotate(0.2deg); }
+        50% { transform: translate(0, 2px) rotate(0deg); }
+        75% { transform: translate(-1px, 1px) rotate(-0.1deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* Subtle ambient motion for elements when not being interacted with */
+    .floating-ambient {
+        animation: float-subtle 8s ease-in-out infinite;
+    }
+
+    /* Ambient ripple effect */
+    .ripple-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+        transform: scale(0);
+        opacity: 0;
+        animation: ripple-animation 1.5s ease-out;
+        pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+        0% {
+            transform: scale(0);
+            opacity: 0.5;
         }
-    }
-
-    /* Animate elements when they enter the viewport */
-    .stExpander, .stMetric, .stDataFrame {
-        opacity: 0.95;
-        transform: translateY(5px);
-        transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-
-    .stExpander.in-view, .stMetric.in-view, .stDataFrame.in-view {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    /* Update the grid to incorporate mouse movement */
-    body::before {
-        transition: transform 0.2s ease-out;
+        100% {
+            transform: scale(2);
+            opacity: 0;
+        }
     }
 </style>
 
@@ -618,122 +573,183 @@ st.markdown("""
     document.addEventListener('DOMContentLoaded', function() {
         observer.observe(document.body, { childList: true, subtree: true });
 
-        // ============================================================= */
-        /* ADD THE MOUSE TRACKING SCRIPT BELOW THIS LINE */
-        /* ============================================================= */
+        // Select all elements that should have the floating effect
+        const floatingElements = document.querySelectorAll('.stExpander, .stMetric, .animated-header, .enhanced-footer, .stDataFrame, .stTabs');
 
-        // Track mouse movement for subtle UI reactions
-        document.addEventListener('mousemove', function(e) {
-            // Calculate mouse position relative to viewport
-            const mouseX = e.clientX / window.innerWidth;
-            const mouseY = e.clientY / window.innerHeight;
+        // Apply the effect to each element
+        floatingElements.forEach((element, index) => {
+            // Skip if element doesn't exist
+            if (!element) return;
 
-            // Update CSS variables for mouse position
-            document.documentElement.style.setProperty('--mouse-x', mouseX);
-            document.documentElement.style.setProperty('--mouse-y', mouseY);
+            // Add depth class to enable 3D effects
+            element.classList.add('floating-element');
 
-            // Apply subtle transforms to elements based on mouse position
-            const cards = document.querySelectorAll('.stExpander, .animated-header, .stMetric');
-            cards.forEach(card => {
-                if (card) {
-                    const rect = card.getBoundingClientRect();
+            // Add ambient floating animation with different delays
+            element.classList.add('floating-ambient');
+            element.style.animationDelay = `${index * 0.5}s`;
 
-                    // Check if mouse is near the card
-                    const cardCenterX = rect.left + rect.width / 2;
-                    const cardCenterY = rect.top + rect.height / 2;
+            // Add ripple effect container
+            element.classList.add('ripple-container');
 
-                    // Calculate distance from mouse to card center
-                    const distX = (e.clientX - cardCenterX) / window.innerWidth;
-                    const distY = (e.clientY - cardCenterY) / window.innerHeight;
+            // Create effect on mouse move over the element
+            element.addEventListener('mousemove', function(e) {
+                // Get element dimensions and position
+                const rect = element.getBoundingClientRect();
 
-                    // Only apply effect if mouse is relatively close
-                    const distance = Math.sqrt(distX * distX + distY * distY);
-                    if (distance < 0.2) {
-                        // Calculate rotation based on mouse position
-                        const rotateX = distY * 1.5; // Max 1.5 degrees
-                        const rotateY = -distX * 1.5; // Max 1.5 degrees
+                // Calculate mouse position relative to element (0-1)
+                const xRelative = (e.clientX - rect.left) / rect.width;
+                const yRelative = (e.clientY - rect.top) / rect.height;
 
-                        // Apply subtle rotation
-                        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                    } else {
-                        // Reset transform when mouse is far
-                        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                // Calculate rotation and depression (max 3 degrees)
+                const maxRotation = 3;
+                const rotateX = (0.5 - yRelative) * maxRotation; // Flip Y axis
+                const rotateY = (xRelative - 0.5) * maxRotation;
+
+                // Apply transform with perspective
+                element.style.transform = `
+                    perspective(1000px) 
+                    rotateX(${rotateX}deg) 
+                    rotateY(${rotateY}deg)
+                    scale(1.01)
+                `;
+
+                // Add a shadow that follows the mouse to enhance depth perception
+                const shadowX = (0.5 - xRelative) * 10;
+                const shadowY = (0.5 - yRelative) * 10;
+                element.style.boxShadow = `
+                    ${shadowX}px ${shadowY}px 15px rgba(103, 89, 122, 0.15),
+                    inset ${-shadowX*0.5}px ${-shadowY*0.5}px 10px rgba(255, 255, 255, 0.1),
+                    inset ${shadowX*0.5}px ${shadowY*0.5}px 10px rgba(103, 89, 122, 0.1)
+                `;
+            });
+
+            // Reset on mouse out
+            element.addEventListener('mouseleave', function() {
+                element.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                element.style.boxShadow = '0 4px 12px rgba(103, 89, 122, 0.1)';
+            });
+
+            // Create ripple effect on click
+            element.addEventListener('click', function(e) {
+                const rect = element.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const ripple = document.createElement('div');
+                ripple.classList.add('ripple');
+                ripple.style.top = `${y}px`;
+                ripple.style.left = `${x}px`;
+                ripple.style.width = `${Math.max(rect.width, rect.height) * 2}px`;
+                ripple.style.height = `${Math.max(rect.width, rect.height) * 2}px`;
+
+                element.appendChild(ripple);
+
+                // Remove ripple after animation
+                setTimeout(() => {
+                    if (ripple.parentNode === element) {
+                        element.removeChild(ripple);
                     }
+                }, 1500);
+            });
+        });
+
+        // Apply the effect dynamically to new elements
+        const dynamicObserver = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            const newElements = node.querySelectorAll('.stExpander, .stMetric, .animated-header, .enhanced-footer, .stDataFrame, .stTabs');
+                            newElements.forEach((element, index) => {
+                                // Apply the same event listeners as above
+                                if (!element.classList.contains('floating-element')) {
+                                    element.classList.add('floating-element');
+                                    element.classList.add('floating-ambient');
+                                    element.style.animationDelay = `${index * 0.5}s`;
+                                    element.classList.add('ripple-container');
+
+                                    element.addEventListener('mousemove', function(e) {
+                                        const rect = element.getBoundingClientRect();
+                                        const xRelative = (e.clientX - rect.left) / rect.width;
+                                        const yRelative = (e.clientY - rect.top) / rect.height;
+
+                                        const maxRotation = 3;
+                                        const rotateX = (0.5 - yRelative) * maxRotation;
+                                        const rotateY = (xRelative - 0.5) * maxRotation;
+
+                                        element.style.transform = `
+                                            perspective(1000px) 
+                                            rotateX(${rotateX}deg) 
+                                            rotateY(${rotateY}deg)
+                                            scale(1.01)
+                                        `;
+
+                                        const shadowX = (0.5 - xRelative) * 10;
+                                        const shadowY = (0.5 - yRelative) * 10;
+                                        element.style.boxShadow = `
+                                            ${shadowX}px ${shadowY}px 15px rgba(103, 89, 122, 0.15),
+                                            inset ${-shadowX*0.5}px ${-shadowY*0.5}px 10px rgba(255, 255, 255, 0.1),
+                                            inset ${shadowX*0.5}px ${shadowY*0.5}px 10px rgba(103, 89, 122, 0.1)
+                                        `;
+                                    });
+
+                                    element.addEventListener('mouseleave', function() {
+                                        element.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                                        element.style.boxShadow = '0 4px 12px rgba(103, 89, 122, 0.1)';
+                                    });
+
+                                    element.addEventListener('click', function(e) {
+                                        const rect = element.getBoundingClientRect();
+                                        const x = e.clientX - rect.left;
+                                        const y = e.clientY - rect.top;
+
+                                        const ripple = document.createElement('div');
+                                        ripple.classList.add('ripple');
+                                        ripple.style.top = `${y}px`;
+                                        ripple.style.left = `${x}px`;
+                                        ripple.style.width = `${Math.max(rect.width, rect.height) * 2}px`;
+                                        ripple.style.height = `${Math.max(rect.width, rect.height) * 2}px`;
+
+                                        element.appendChild(ripple);
+
+                                        setTimeout(() => {
+                                            if (ripple.parentNode === element) {
+                                                element.removeChild(ripple);
+                                            }
+                                        }, 1500);
+                                    });
+                                }
+                            });
+                        }
+                    });
                 }
             });
+        });
 
-            // Apply subtle movement to grid based on mouse
-            const gridMovement = 5; // Max 5px movement
-            document.body.style.setProperty('--grid-x-offset', `${(mouseX - 0.5) * -gridMovement}px`);
-            document.body.style.setProperty('--grid-y-offset', `${(mouseY - 0.5) * -gridMovement}px`);
+        // Start observing the document body for DOM changes
+        dynamicObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
 
-            // Update the grid transform with mouse position
-            const style = document.createElement('style');
-            style.textContent = `
-                body::before { 
-                    transform: translateX(var(--grid-x-offset, 0)) translateY(calc(var(--grid-y-offset, 0) + var(--scroll-y, 0) * 0.1px)); 
-                }
-            `;
+        // Add subtle parallax to grid on scroll
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.scrollY;
+            const grid = document.querySelector('.grid-background');
+            const gridContainer = document.querySelector('.main .block-container::before');
 
-            // Replace any existing mouse-tracking style
-            const existingStyle = document.getElementById('mouse-tracking-style');
-            if (existingStyle) {
-                existingStyle.remove();
+            if (grid) {
+                grid.style.transform = `translateY(${scrollPosition * 0.05}px)`;
             }
 
-            style.id = 'mouse-tracking-style';
-            document.head.appendChild(style);
-        });
-
-        // Enable subtle parallax effect on scroll
-        const parallaxItems = document.querySelectorAll('.animated-header, .enhanced-footer');
-        window.addEventListener('scroll', function() {
-            // Update scroll position CSS variable
-            document.documentElement.style.setProperty('--scroll-y', window.scrollY);
-
-            parallaxItems.forEach(item => {
-                const scrollPosition = window.scrollY;
-                const scrollFactor = item.classList.contains('animated-header') ? 0.4 : 0.2;
-                const translateY = scrollPosition * scrollFactor;
-                item.style.transform = `translateY(${translateY}px)`;
-            });
-        });
-
-        // Detect when elements enter viewport for subtle entrance animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('in-view');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        // Observe elements that should animate on scroll
-        document.querySelectorAll('.stExpander, .stMetric, .stDataFrame').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Parallax grid scroll effect
-        window.addEventListener('scroll', function() {
-            const scrollY = window.scrollY;
-
-            // Apply the custom property in the ::before pseudo element
-            const style = document.createElement('style');
-            style.textContent = `body::before { transform: translateY(${scrollY * 0.1}px); }`;
-
-            // Replace any existing style element
-            const existingStyle = document.getElementById('parallax-style');
-            if (existingStyle) {
-                existingStyle.remove();
+            if (gridContainer) {
+                gridContainer.style.transform = `translateY(${scrollPosition * 0.05}px)`;
             }
-
-            style.id = 'parallax-style';
-            document.head.appendChild(style);
         });
     });
 </script>
 """, unsafe_allow_html=True)
-#Explicit Grid Creation
+# Add explicit grid background div right after your main st.markdown CSS block
 st.markdown("""
 <div class="grid-background"></div>
 <style>
@@ -753,7 +769,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 
 # Main App
