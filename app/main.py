@@ -10,6 +10,7 @@ from app.utils.achievements import init_achievements_db
 from app.pages import dashboard, job_tracker, study_tracker, settings
 from app.components.header import display_header
 from app.components.footer import display_footer
+from app.components.fluid_background import add_fluid_background, add_balatro_fluid_background
 
 # Set page configuration
 st.set_page_config(
@@ -797,6 +798,9 @@ def main():
         ):
             st.session_state.current_page = page_name
             st.rerun()
+
+    # Add the fluid background animation (add this line)
+    add_balatro_fluid_background()
 
     # Display the custom header
     display_header()
