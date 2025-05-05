@@ -1,5 +1,22 @@
 import streamlit as st
 
+def simple_background_test():
+    """A minimal test to check if canvas backgrounds work at all."""
+    st.markdown("""
+    <style>
+    .test-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(244, 247, 190, 0.2); /* Light cream with transparency */
+        z-index: 0;
+        pointer-events: none;
+    }
+    </style>
+    <div class="test-background"></div>
+    """, unsafe_allow_html=True)
 
 def add_fluid_background():
     """Add a liquid-moving animation background inspired by Balatro."""
@@ -13,7 +30,7 @@ def add_fluid_background():
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -2; /* Behind grid */
+        z-index: 0; /* Behind grid */
         pointer-events: none;
     }
 
